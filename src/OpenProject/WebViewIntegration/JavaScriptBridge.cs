@@ -1,10 +1,7 @@
 ﻿using CefSharp;
 using CefSharp.Wpf;
-using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using OpenProject.Shared;
-using System;
-using System.Net.Http;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -12,6 +9,9 @@ namespace OpenProject.WebViewIntegration
 {
   public class JavaScriptBridge
   {
+    private readonly OpenProjectInstanceValidator _instanceValidator;
+
+
     /// <summary>
     /// This is the name of the global window object that's set in JavaScript, e.g.
     /// 'window.RevitBridge'.
@@ -20,18 +20,14 @@ namespace OpenProject.WebViewIntegration
 
     public const string REVIT_READY_EVENT_NAME = "revit.plugin.ready";
 
-    private readonly IServiceProvider _serviceProvider;
+    private bool _isLoaded;
 
-    private JavaScriptBridge()
+    public JavaScriptBridge(OpenProjectInstanceValidator instanceValidator)
     {
-      // This class should only be available as a singleton, access
-      // via the static 'Instance' property.
-
-      _serviceProvider = InitializeIoCContainer();
+      _instanceValidator = instanceValidator;
     }
 
     private ChromiumWebBrowser _webBrowser;
-    public static JavaScriptBridge Instance { get; } = new JavaScriptBridge();
 
     public event WebUIMessageReceivedEventHandler OnWebUIMessageReveived;
 
@@ -41,30 +37,7 @@ namespace OpenProject.WebViewIntegration
 
     public delegate void AppForegroundRequestReceivedEventHandler(object sender);
 
-    private static IServiceProvider InitializeIoCContainer()
-    {
-      var services = new ServiceCollection();
-      services.AddTransient<OpenProjectInstanceValidator>();
-
-      // We're using HttpClientFactory to ensure that we don't hit any problems with
-      // port exhaustion or stale DNS entries in long-lived HttpClients
-      services.AddHttpClient(nameof(OpenProjectInstanceValidator))
-        .ConfigureHttpMessageHandlerBuilder(h =>
-        {
-          if (h.PrimaryHandler is HttpClientHandler httpClientHandler)
-          {
-            // It defaults to true, but let's ensure it stays that way
-            httpClientHandler.AllowAutoRedirect = true;
-          }
-        })
-        ;
-      return services.BuildServiceProvider();
-    }
-
-    private void ChangeLoadingState(object sender, object eventArgs)
-    {
-      isLoaded = true;
-    }
+    private void ChangeLoadingState(object sender, object eventArgs) => _isLoaded = true;
 
     public void SetWebBrowser(ChromiumWebBrowser webBrowser)
     {
@@ -77,11 +50,10 @@ namespace OpenProject.WebViewIntegration
       _webBrowser.LoadingStateChanged += ChangeLoadingState;
     }
 
-    private bool isLoaded = false;
 
     public void SendMessageToRevit(string messageType, string trackingId, string messagePayload)
     {
-      if (!isLoaded)
+      if (!_isLoaded)
       {
         return;
       }
@@ -139,7 +111,7 @@ namespace OpenProject.WebViewIntegration
 
     public void SendMessageToOpenProject(string messageType, string trackingId, string messagePayload)
     {
-      if (!isLoaded)
+      if (!_isLoaded)
       {
         return;
       }
@@ -174,17 +146,10 @@ namespace OpenProject.WebViewIntegration
 
     private void VisitUrl(string url)
     {
-      Application.Current.Dispatcher.Invoke(() =>
-      {
-        _webBrowser.Address = url;
-      });
+      Application.Current.Dispatcher.Invoke(() => { _webBrowser.Address = url; });
     }
 
-    private string LandingIndexPageUrl()
-    {
-      string url = EmbeddedLandingPageHandler.GetEmbeddedLandingPageIndexUrl();
-      return url;
-    }
+    private static string LandingIndexPageUrl() => EmbeddedLandingPageHandler.GetEmbeddedLandingPageIndexUrl();
 
     private void HandleInstanceNameReceived(string instanceName)
     {
@@ -194,19 +159,11 @@ namespace OpenProject.WebViewIntegration
 
     private async Task ValidateInstanceAsync(string trackingId, string message)
     {
-      var validator = _serviceProvider.GetService<OpenProjectInstanceValidator>();
-
-      var instanceValidationResult = await validator.IsValidOpenProjectInstanceAsync(message);
-
-      var frontendResult = new
-      {
-        instanceValidationResult.isValid,
-        instanceValidationResult.instanceBaseUrl
-      };
+      var (isValid, instanceBaseUrl) = await _instanceValidator.IsValidOpenProjectInstanceAsync(message);
 
       SendMessageToOpenProject(MessageTypes.VALIDATED_INSTANCE,
         trackingId,
-        JsonConvert.SerializeObject(frontendResult));
+        JsonConvert.SerializeObject(new { isValid, instanceBaseUrl }));
     }
   }
 }

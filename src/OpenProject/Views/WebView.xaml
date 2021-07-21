@@ -1,0 +1,18 @@
+﻿<UserControl
+  x:Class="OpenProject.Views.WebView"
+  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:vm="clr-namespace:OpenProject.ViewModels">
+  <UserControl.Resources>
+    <ResourceDictionary Source="../Themes/Colors.xaml" />
+  </UserControl.Resources>
+
+  <Grid Background="{StaticResource BackgroundLight}">
+    <ContentControl>
+      <ContentControl.Content>
+        <Binding Path="(vm:WebViewModel.Browser)" />
+      </ContentControl.Content>
+    </ContentControl>
+  </Grid>
+
+</UserControl>
