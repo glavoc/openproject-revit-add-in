@@ -12,10 +12,7 @@ namespace OpenProject.Api
 {
   public static class GitHubRest
   {
-    internal static RestClient Client
-    {
-      get { return new RestClient(@"https://api.github.com/"); } 
-    }
+    private static RestClient Client => new RestClient(@"https://api.github.com/");
 
     internal static async Task<List<GitHubRelease>> GetReleases(CancellationTokenSource cancel)
     {
@@ -32,7 +29,7 @@ namespace OpenProject.Api
       var response = await DoTaskAsync<List<GitHubRelease>>(request, cancel);
 
       return cancel.IsCancellationRequested || !CheckResponse(response, HttpStatusCode.OK) ? null : response.Data;
-    } 
+    }
 
     internal static GitHubRelease GetLatestRelease()
     {

@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using System.Windows;
 using CefSharp.Wpf;
 using OpenProject.Api;
-using OpenProject.Data.Utils;
 using OpenProject.WebViewIntegration;
 using OpenProject.Windows;
 

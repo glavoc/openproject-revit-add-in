@@ -1,4 +1,3 @@
-using OpenProject.Data.Utils;
 using CefSharp;
 using CefSharp.Wpf;
 using System.Reflection;

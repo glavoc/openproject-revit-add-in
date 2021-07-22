@@ -14,13 +14,10 @@ namespace OpenProject.WebViewIntegration
   {
     public static void SetFocusToRevit()
     {
-      var revitProcess = Process.GetProcesses()
-        .Where(p => p.ProcessName == "Revit")
-        .FirstOrDefault();
-      if (revitProcess != null)
-      {
-        SetForegroundWindow(revitProcess.MainWindowHandle);
-      }
+      Process revitProcess = Process
+        .GetProcesses()
+        .FirstOrDefault(p => p.ProcessName == "Revit");
+      if (revitProcess != null) SetForegroundWindow(revitProcess.MainWindowHandle);
     }
 
     [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
