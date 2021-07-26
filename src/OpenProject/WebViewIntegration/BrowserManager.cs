@@ -1,69 +1,84 @@
-﻿using CefSharp;
+﻿using System;
+using CefSharp;
 using CefSharp.Wpf;
 using System.ComponentModel;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 
 namespace OpenProject.WebViewIntegration
 {
-  public partial class BrowserManager
+  public sealed class BrowserManager
   {
-    private readonly ChromiumWebBrowser _webBrowser;
+    private readonly JavaScriptBridge _javaScriptBridge;
+    private readonly BcfierJavascriptInterop _javascriptInterop;
+    public ChromiumWebBrowser Browser { get; private set; }
 
-    public BrowserManager(ChromiumWebBrowser webBrowser)
+    public BrowserManager(JavaScriptBridge javaScriptBridge, BcfierJavascriptInterop javascriptInterop)
     {
-      _webBrowser = webBrowser;
-      JavaScriptBridge.Instance.SetWebBrowser(_webBrowser);
+      _javaScriptBridge = javaScriptBridge;
+      _javascriptInterop = javascriptInterop;
+    }
 
-      _webBrowser.LoadingStateChanged += (s, e) =>
+    public void Initialize()
+    {
+      CefBrowserInitializer.InitializeCefBrowser();
+      Browser = new ChromiumWebBrowser();
+
+      var knownGoodUrls = ConfigurationHandler.LoadAllInstances();
+      var lastVisitedPage = ConfigurationHandler.LastVisitedPage();
+      var isWhiteListedUrl = knownGoodUrls.Any(goodUrl =>
+        lastVisitedPage.StartsWith(goodUrl, StringComparison.InvariantCultureIgnoreCase));
+
+      Browser.Address =
+        isWhiteListedUrl ? lastVisitedPage : EmbeddedLandingPageHandler.GetEmbeddedLandingPageIndexUrl();
+
+      _javaScriptBridge.SetWebBrowser(Browser);
+
+      Browser.LoadingStateChanged += (s, e) =>
       {
         if (!e.IsLoading) // Not loading means the load is complete
         {
-          Application.Current.Dispatcher.Invoke(async () =>
-          {
-            await InitializeRevitBridgeIfNotPresentAsync();
-          });
+          Application.Current.Dispatcher.Invoke(async () => { await InitializeRevitBridgeIfNotPresentAsync(); });
         }
       };
 
       // Save all page changes, so that the user can resume to the same
       // page as last time she used the add-in.
       DependencyPropertyDescriptor
-        .FromProperty(ChromiumWebBrowser.AddressProperty,
-                      typeof(ChromiumWebBrowser))
-        .AddValueChanged(_webBrowser, (s, e) =>
+        .FromProperty(ChromiumWebBrowser.AddressProperty, typeof(ChromiumWebBrowser))
+        .AddValueChanged(Browser, (s, e) =>
         {
-          string newUrl = _webBrowser.Address;
+          var newUrl = Browser.Address;
           // Don't save local file addresses such as the settings page.
           if (newUrl.StartsWith("http"))
           {
-            ConfigurationHandler.SaveLastVisitedPage(_webBrowser.Address);
+            ConfigurationHandler.SaveLastVisitedPage(Browser.Address);
           }
         });
 
       // This handles checking of valid urls, otherwise they're opened in
       // the system browser
-      _webBrowser.RequestHandler = new OpenProjectBrowserRequestHandler();
+      Browser.RequestHandler = new OpenProjectBrowserRequestHandler();
       // This one prevents popups or additional browser windows
-      _webBrowser.LifeSpanHandler = new OpenProjectBrowserLifeSpanHandler();
+      Browser.LifeSpanHandler = new OpenProjectBrowserLifeSpanHandler();
 
-      if (ConfigurationHandler.ShouldEnableDevelopmentTools())
+      if (!ConfigurationHandler.ShouldEnableDevelopmentTools()) return;
+
+      var devToolsEnabled = false;
+      Browser.IsBrowserInitializedChanged += (s, e) =>
       {
-        var devToolsEnabled = false;
-        _webBrowser.IsBrowserInitializedChanged += (s, e) =>
-        {
-          if (!devToolsEnabled)
-          {
-            _webBrowser.ShowDevTools();
-            devToolsEnabled = true;
-          }
-        };
-      }
+        if (devToolsEnabled) return;
+
+        Browser.ShowDevTools();
+        devToolsEnabled = true;
+      };
     }
 
     private async Task InitializeRevitBridgeIfNotPresentAsync()
     {
-      var revitBridgeIsPresentCheckResponse = await _webBrowser.GetMainFrame().EvaluateScriptAsync("window." + JavaScriptBridge.REVIT_BRIDGE_JAVASCRIPT_NAME);
+      JavascriptResponse revitBridgeIsPresentCheckResponse = await Browser.GetMainFrame()
+        .EvaluateScriptAsync("window." + JavaScriptBridge.REVIT_BRIDGE_JAVASCRIPT_NAME);
       if (revitBridgeIsPresentCheckResponse?.Result != null)
       {
         // No need to register the bridge since it's already bound
@@ -72,13 +87,16 @@ namespace OpenProject.WebViewIntegration
 
       // Register the bridge between JS and C#
       // This also registers the callback that should be bound to by OpenProject to receive messages from BCFier
-      _webBrowser.JavascriptObjectRepository.UnRegisterAll();
-      _webBrowser.GetMainFrame().ExecuteJavaScriptAsync($"CefSharp.DeleteBoundObject('{JavaScriptBridge.REVIT_BRIDGE_JAVASCRIPT_NAME}');");
-      _webBrowser.JavascriptObjectRepository.Register(JavaScriptBridge.REVIT_BRIDGE_JAVASCRIPT_NAME, new BcfierJavascriptInterop(), true);
+      Browser.JavascriptObjectRepository.UnRegisterAll();
+      Browser.GetMainFrame()
+        .ExecuteJavaScriptAsync($"CefSharp.DeleteBoundObject('{JavaScriptBridge.REVIT_BRIDGE_JAVASCRIPT_NAME}');");
+      Browser.JavascriptObjectRepository.Register(
+        JavaScriptBridge.REVIT_BRIDGE_JAVASCRIPT_NAME, _javascriptInterop, true);
 
-      _webBrowser.GetMainFrame().ExecuteJavaScriptAsync(@"(async function(){
+      Browser.GetMainFrame().ExecuteJavaScriptAsync(@"(async function(){
 await CefSharp.BindObjectAsync(""" + JavaScriptBridge.REVIT_BRIDGE_JAVASCRIPT_NAME + @""", ""bound"");
-window." + JavaScriptBridge.REVIT_BRIDGE_JAVASCRIPT_NAME + @".sendMessageToOpenProject = (message) => {console.log(JSON.parse(message))}; // This is the callback to be used by OpenProject for receiving messages
+window." + JavaScriptBridge.REVIT_BRIDGE_JAVASCRIPT_NAME +
+                                                    @".sendMessageToOpenProject = (message) => {console.log(JSON.parse(message))}; // This is the callback to be used by OpenProject for receiving messages
 window.dispatchEvent(new Event('" + JavaScriptBridge.REVIT_READY_EVENT_NAME + @"'));
 })();");
       // Now in JS, call this: openProjectBridge.messageFromOpenProject('Message from JS');

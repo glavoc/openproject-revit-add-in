@@ -1,15 +1,17 @@
 ﻿namespace OpenProject.WebViewIntegration
 {
-  public partial class BrowserManager
+  public sealed class BcfierJavascriptInterop
   {
-    public class BcfierJavascriptInterop
-    {
-      private readonly JavaScriptBridge _javaScriptBridge = JavaScriptBridge.Instance;
+    private readonly JavaScriptBridge _javaScriptBridge;
 
-      public void SendMessageToRevit(string type, string trackingId, string payload)
-      {
-        _javaScriptBridge.SendMessageToRevit(type, trackingId, payload);
-      }
+    public BcfierJavascriptInterop(JavaScriptBridge javaScriptBridge)
+    {
+      _javaScriptBridge = javaScriptBridge;
+    }
+
+    public void SendMessageToRevit(string type, string trackingId, string payload)
+    {
+      _javaScriptBridge.SendMessageToRevit(type, trackingId, payload);
     }
   }
 }
