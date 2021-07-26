@@ -5,11 +5,11 @@ namespace OpenProject.Shared
     [System.CodeDom.Compiler.GeneratedCode("GitVersionBuild", "")]
     public static class VersionsService
     {
-        public static string Version => "2.2.5-task-37958-add-r0001";
-        public static string CommitInfo => "16.Branch.task-37958-add-revit-2022-support.Sha.fd4884a5ecf09130ab05f781ff6a1562232385b5";
-        public static string CommitDate => "2021-07-07";
-        public static string CommitHash => "fd4884a5ecf09130ab05f781ff6a1562232385b5";
-        public static string InformationalVersion => "2.2.5-task-37958-add-revit-2022-support.1+16.Branch.task-37958-add-revit-2022-support.Sha.fd4884a5ecf09130ab05f781ff6a1562232385b5";
-        public static DateTime BuildDateUtc { get; } = new DateTime(2021, 7, 8, 11, 56, 28, DateTimeKind.Utc);
+        public static string Version => "2.2.5-chore-remove-unu0001";
+        public static string CommitInfo => "12.Branch.chore-remove-unused-code.Sha.431a71a0c2711be19095b4089c084a19fd932b21";
+        public static string CommitDate => "2021-07-22";
+        public static string CommitHash => "431a71a0c2711be19095b4089c084a19fd932b21";
+        public static string InformationalVersion => "2.2.5-chore-remove-unused-code.1+12.Branch.chore-remove-unused-code.Sha.431a71a0c2711be19095b4089c084a19fd932b21";
+        public static DateTime BuildDateUtc { get; } = new DateTime(2021, 7, 23, 15, 2, 49, DateTimeKind.Utc);
     }
 }

@@ -33,6 +33,8 @@ namespace OpenProject.WebViewIntegration
       Browser.Address =
         isWhiteListedUrl ? lastVisitedPage : EmbeddedLandingPageHandler.GetEmbeddedLandingPageIndexUrl();
 
+      Browser.DownloadHandler = new DownloadHandler();
+
       _javaScriptBridge.SetWebBrowser(Browser);
 
       Browser.LoadingStateChanged += (s, e) =>
