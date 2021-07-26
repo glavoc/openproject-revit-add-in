@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json.Linq;
 using System;
 using System.Net;
 using System.Net.Http;
@@ -25,7 +24,7 @@ namespace OpenProject.WebViewIntegration
         return (false, null);
       }
 
-      var response = await GetHttpResponseAsync(instanceUrl);
+      HttpResponseMessage response = await GetHttpResponseAsync(instanceUrl);
       if (response == null)
       {
         // This means there was an Http error, e.g. unable to make a connection
@@ -54,7 +53,7 @@ namespace OpenProject.WebViewIntegration
       const string apiPathSuffix = "/api/v3";
       var hasApiSuffix = instanceNameOrUrl.TrimEnd('/').EndsWith(apiPathSuffix, StringComparison.InvariantCultureIgnoreCase);
 
-      string appendSuffix(string uri)
+      string AppendSuffix(string uri)
       {
         var suffix = hasApiSuffix ? "" : apiPathSuffix;
         return uri + suffix;
@@ -63,19 +62,15 @@ namespace OpenProject.WebViewIntegration
       if (Uri.TryCreate(instanceNameOrUrl, UriKind.Absolute, out var instanceUri)
         && Regex.IsMatch(instanceUri.Scheme, "^https?$"))
       {
-        return appendSuffix(instanceUri.AbsoluteUri.TrimEnd('/'));
+        return AppendSuffix(instanceUri.AbsoluteUri.TrimEnd('/'));
       }
 
-      var subDomainRegexPattern = "^[a-zA-Z0-9-]+$";
+      const string subDomainRegexPattern = "^[a-zA-Z0-9-]+$";
       if (Regex.IsMatch(instanceNameOrUrl, subDomainRegexPattern))
-      {
         return $"https://{instanceNameOrUrl}.openproject.com{apiPathSuffix}";
-      }
 
       if (Uri.TryCreate($"https://{instanceNameOrUrl}", UriKind.Absolute, out instanceUri))
-      {
-        return appendSuffix(instanceUri.AbsoluteUri.TrimEnd('/'));
-      }
+        return AppendSuffix(instanceUri.AbsoluteUri.TrimEnd('/'));
 
       return null;
     }
