@@ -3,7 +3,7 @@ using CefSharp;
 
 namespace OpenProject.WebViewIntegration
 {
-  public sealed class DownloadHandler : IDownloadHandler
+  public sealed class OpenProjectBrowserDownloadHandler : IDownloadHandler
   {
     public event EventHandler<DownloadItem> OnBeforeDownloadFired;
 
