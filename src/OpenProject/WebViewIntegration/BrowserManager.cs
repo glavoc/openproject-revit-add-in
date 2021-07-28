@@ -12,18 +12,31 @@ namespace OpenProject.WebViewIntegration
   {
     private readonly JavaScriptBridge _javaScriptBridge;
     private readonly BcfierJavascriptInterop _javascriptInterop;
+    private readonly ChromiumWebBrowser _chromiumWebBrowser;
+    private readonly IDownloadHandler _downloadHandler;
+    private readonly IRequestHandler _requestHandler;
+    private readonly ILifeSpanHandler _lifeSpanHandler;
     public ChromiumWebBrowser Browser { get; private set; }
 
-    public BrowserManager(JavaScriptBridge javaScriptBridge, BcfierJavascriptInterop javascriptInterop)
+    public BrowserManager(
+      JavaScriptBridge javaScriptBridge,
+      BcfierJavascriptInterop javascriptInterop,
+      ChromiumWebBrowser chromiumWebBrowser,
+      IDownloadHandler downloadHandler,
+      IRequestHandler requestHandler,
+      ILifeSpanHandler lifeSpanHandler)
     {
       _javaScriptBridge = javaScriptBridge;
       _javascriptInterop = javascriptInterop;
+      _chromiumWebBrowser = chromiumWebBrowser;
+      _downloadHandler = downloadHandler;
+      _requestHandler = requestHandler;
+      _lifeSpanHandler = lifeSpanHandler;
     }
 
     public void Initialize()
     {
-      CefBrowserInitializer.InitializeCefBrowser();
-      Browser = new ChromiumWebBrowser();
+      Browser = _chromiumWebBrowser;
 
       var knownGoodUrls = ConfigurationHandler.LoadAllInstances();
       var lastVisitedPage = ConfigurationHandler.LastVisitedPage();
@@ -32,6 +45,13 @@ namespace OpenProject.WebViewIntegration
 
       Browser.Address =
         isWhiteListedUrl ? lastVisitedPage : EmbeddedLandingPageHandler.GetEmbeddedLandingPageIndexUrl();
+
+      Browser.DownloadHandler = _downloadHandler;
+      // This handles checking of valid urls, otherwise they're opened in
+      // the system browser
+      Browser.RequestHandler = _requestHandler;
+      // This one prevents popups or additional browser windows
+      Browser.LifeSpanHandler = _lifeSpanHandler;
 
       _javaScriptBridge.SetWebBrowser(Browser);
 
@@ -56,12 +76,6 @@ namespace OpenProject.WebViewIntegration
             ConfigurationHandler.SaveLastVisitedPage(Browser.Address);
           }
         });
-
-      // This handles checking of valid urls, otherwise they're opened in
-      // the system browser
-      Browser.RequestHandler = new OpenProjectBrowserRequestHandler();
-      // This one prevents popups or additional browser windows
-      Browser.LifeSpanHandler = new OpenProjectBrowserLifeSpanHandler();
 
       if (!ConfigurationHandler.ShouldEnableDevelopmentTools()) return;
 
