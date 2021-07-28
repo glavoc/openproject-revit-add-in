@@ -1,10 +1,14 @@
-﻿using System.Net.Http;
+﻿using System;
+using System.IO;
+using System.Net.Http;
 using CefSharp;
 using CefSharp.Wpf;
 using Microsoft.Extensions.DependencyInjection;
+using OpenProject.Shared;
 using OpenProject.ViewModels;
 using OpenProject.Views;
 using OpenProject.WebViewIntegration;
+using Serilog;
 
 namespace OpenProject.Windows.Services
 {
@@ -49,6 +53,20 @@ namespace OpenProject.Windows.Services
         });
 
       return services;
+    }
+
+    internal static void ConfigureLogger()
+    {
+      var logFilePath = Path.Combine(
+        ConfigurationConstant.OpenProjectApplicationData,
+        "logs",
+        "OpenProject.Log..txt");
+
+      Log.Logger = new LoggerConfiguration()
+        .MinimumLevel.Debug()
+        .WriteTo.File(logFilePath, rollingInterval: RollingInterval.Day)
+        .WriteTo.Console()
+        .CreateLogger();
     }
   }
 }

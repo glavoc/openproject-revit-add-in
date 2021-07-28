@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using OpenProject.Shared;
 using System.Threading.Tasks;
 using System.Windows;
+using Serilog;
 
 namespace OpenProject.WebViewIntegration
 {
@@ -55,8 +56,11 @@ namespace OpenProject.WebViewIntegration
     {
       if (!_isLoaded)
       {
+        Log.Warning("Failed to send message to Revit: bridge web browser not loaded");
         return;
       }
+
+      Log.Information("Sending message of type {A} to Revit", messageType);
 
       if (messageType == MessageTypes.INSTANCE_SELECTED)
       {
@@ -113,8 +117,11 @@ namespace OpenProject.WebViewIntegration
     {
       if (!_isLoaded)
       {
+        Log.Warning("Failed to send message to OpenProject: bridge web browser not loaded");
         return;
       }
+
+      Log.Information("Sending message of type {A} to OpenProject", messageType);
 
       if (messageType == MessageTypes.CLOSE_DESKTOP_APPLICATION)
       {

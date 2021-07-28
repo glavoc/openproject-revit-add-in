@@ -7,14 +7,14 @@ using System.Windows.Media.Imaging;
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.UI;
 using OpenProject.Shared;
+using Serilog;
 
 namespace OpenProject.Revit.Entry
 {
-
   [Transaction(TransactionMode.Manual)]
   public class AppMain : IExternalApplication
   {
-    private string _path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+    private readonly string _path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
     #region Revit IExternalApplciation Implementation
 
@@ -27,44 +27,62 @@ namespace OpenProject.Revit.Entry
     {
       try
       {
+        ConfigureLogger();
+
         // Tab
-        string TabName = "OpenProject";
-        string PanelName = "BCF management";
-        application.CreateRibbonTab(TabName);
-        RibbonPanel panel = application.CreateRibbonPanel(TabName, PanelName);
+        const string tabName = "OpenProject";
+        const string panelName = "BCF management";
+        application.CreateRibbonTab(tabName);
+        RibbonPanel panel = application.CreateRibbonPanel(tabName, panelName);
 
         // Button Data
-        PushButton browserButton = panel.AddItem(new PushButtonData("OpenProject",
-                                                                     "OpenProject",
-                                                                     Path.Combine(_path, "OpenProject.Revit.dll"),
-                                                                     "OpenProject.Revit.Entry.CmdMain")) as PushButton;
-        // Images and Tooltip
-        if (browserButton != null)
+        RibbonItem browserButtonItem = panel.AddItem(
+          new PushButtonData("OpenProject",
+            "OpenProject",
+            Path.Combine(_path, "OpenProject.Revit.dll"),
+            "OpenProject.Revit.Entry.CmdMain"));
+
+        if (browserButtonItem is PushButton browserButton)
         {
           browserButton.Image = LoadPngImgSource("OpenProject.Revit.Assets.OpenProjectLogo16.png");
           browserButton.LargeImage = LoadPngImgSource("OpenProject.Revit.Assets.OpenProjectLogo32.png");
           browserButton.ToolTip = "OpenProject browser";
         }
 
-        PushButton settingsButton = panel.AddItem(new PushButtonData("Settings",
-                                                                      "Settings",
-                                                                      Path.Combine(_path, "OpenProject.Revit.dll"),
-                                                                     "OpenProject.Revit.Entry.CmdMainSettings")) as PushButton;
+        RibbonItem settingsButtonItem = panel.AddItem(
+          new PushButtonData("Settings",
+            "Settings",
+            Path.Combine(_path, "OpenProject.Revit.dll"),
+            "OpenProject.Revit.Entry.CmdMainSettings"));
 
-        if (settingsButton != null)
+        if (settingsButtonItem is PushButton settingsButton)
         {
           settingsButton.Image = LoadPngImgSource("OpenProject.Revit.Assets.Settings32.png");
           settingsButton.LargeImage = LoadPngImgSource("OpenProject.Revit.Assets.Settings32.png");
           settingsButton.ToolTip = "OpenProject Revit Add-in settings";
         }
       }
-      catch (Exception ex1)
+      catch (Exception exception)
       {
-        MessageBox.Show("exception: " + ex1);
+        MessageBox.Show("exception: " + exception);
         return Result.Failed;
       }
 
       return Result.Succeeded;
+    }
+
+    private void ConfigureLogger()
+    {
+      var logFilePath = Path.Combine(
+        ConfigurationConstant.OpenProjectApplicationData,
+        "logs",
+        "OpenProject.Revit.Log..txt");
+
+      Log.Logger = new LoggerConfiguration()
+        .MinimumLevel.Debug()
+        .WriteTo.File(logFilePath, rollingInterval: RollingInterval.Day)
+        .WriteTo.Console()
+        .CreateLogger();
     }
 
     /// <summary>
@@ -111,7 +129,6 @@ namespace OpenProject.Revit.Entry
     /// <returns></returns>
     private ImageSource LoadPngImgSource(string resourceName)
     {
-
       try
       {
         // Assembly & Stream
@@ -119,21 +136,21 @@ namespace OpenProject.Revit.Entry
         var icon = assembly.GetManifestResourceStream(resourceName);
 
         // Decoder
-        PngBitmapDecoder m_decoder = new PngBitmapDecoder(icon, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.Default);
+        PngBitmapDecoder m_decoder =
+          new PngBitmapDecoder(icon, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.Default);
 
         // Source
         ImageSource m_source = m_decoder.Frames[0];
         return (m_source);
-
       }
-      catch { }
+      catch
+      {
+      }
 
       // Fail
       return null;
-
     }
 
     #endregion
-
   }
 }

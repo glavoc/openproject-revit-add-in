@@ -11,6 +11,7 @@ using System.Linq;
 using iabi.BCF.APIObjects.V21;
 using OpenProject.Shared.Math3D;
 using OpenProject.Shared.Math3D.Enumeration;
+using Serilog;
 
 namespace OpenProject.Revit.Entry
 {
@@ -56,6 +57,7 @@ namespace OpenProject.Revit.Entry
     /// <param name="bcfViewpoint">The bcf viewpoint to be shown in current view.</param>
     public static void ShowBcfViewpoint(BcfViewpointViewModel bcfViewpoint)
     {
+      Log.Information("Received 'Opening BCF Viewpoint event'. Attempting to open viewpoint ...");
       Instance._bcfViewpoint = bcfViewpoint;
       ExternalEvent.Raise();
     }
@@ -64,16 +66,26 @@ namespace OpenProject.Revit.Entry
     {
       try
       {
+        Log.Information("Opening BCF Viewpoint ...");
+
         UIDocument uiDoc = app.ActiveUIDocument;
         Document doc = uiDoc.Document;
 
+        Log.Information("Opening related OpenProject view ...");
         var hasCamera = _bcfViewpoint.GetCamera().Match(
           camera => ShowOpenProjectView(app, camera),
           () => false);
-        if (!hasCamera) return;
+        if (!hasCamera)
+        {
+          Log.Error("BCF viewpoint has no camera information. Aborting ...");
+          return;
+        }
 
+        Log.Information("Applying object visibility ...");
         DeselectAndUnhideElements(uiDoc);
+        Log.Information("Applying object styles ...");
         ApplyElementStyles(_bcfViewpoint, doc, uiDoc);
+        Log.Information("Applying clipping plane information ...");
         ApplyClippingPlanes(_bcfViewpoint, uiDoc);
 
         // The local callback first needs to be initialized to null since it's
@@ -93,6 +105,7 @@ namespace OpenProject.Revit.Entry
       }
       catch (Exception ex)
       {
+        Log.Error(ex, "Failed to load BCF viewpoint");
         TaskDialog.Show("Error!", "exception: " + ex);
       }
     }

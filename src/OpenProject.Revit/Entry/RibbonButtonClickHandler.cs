@@ -58,14 +58,14 @@ namespace OpenProject.Revit.Entry
       //Version check
       if (!commandData.Application.Application.VersionName.Contains(RevitVersion))
       {
-        using (var td = new TaskDialog("Untested version"))
+        using var td = new TaskDialog("Untested version")
         {
-          td.TitleAutoPrefix = false;
-          td.MainInstruction = "Untested Revit Version";
-          td.MainContent = "This Add-In was built and tested only for Revit " + RevitVersion +
-                           ", proceed at your own risk";
-          td.Show();
-        }
+          TitleAutoPrefix = false,
+          MainInstruction = "Untested Revit Version",
+          MainContent = "This Add-In was built and tested only for Revit " + RevitVersion +
+                        ", proceed at your own risk"
+        };
+        td.Show();
       }
 
       // Form Running?
