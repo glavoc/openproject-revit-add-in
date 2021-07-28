@@ -98,6 +98,7 @@ namespace OpenProject.Revit.Entry
         {
           uiDoc.RefreshActiveView();
           app.ActiveUIDocument.UpdateAllOpenViews();
+          Log.Information("Finished updating all open views after loading BCF viewpoint.");
           app.Idling -= AfterIdleEventHandler;
         }
 
