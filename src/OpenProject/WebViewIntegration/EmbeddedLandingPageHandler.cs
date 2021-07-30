@@ -62,6 +62,7 @@ namespace OpenProject.WebViewIntegration
       using Stream resourceStream = GetEmbeddedResourceZipStream();
       using FileStream fs = File.Create(tempPath);
       resourceStream.CopyTo(fs);
+      fs.Close();
 
       ZipFile.ExtractToDirectory(tempPath, landingPageFolder);
     }
