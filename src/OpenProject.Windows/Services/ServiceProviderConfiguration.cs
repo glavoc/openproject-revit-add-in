@@ -54,19 +54,5 @@ namespace OpenProject.Windows.Services
 
       return services;
     }
-
-    internal static void ConfigureLogger()
-    {
-      var logFilePath = Path.Combine(
-        ConfigurationConstant.OpenProjectApplicationData,
-        "logs",
-        "OpenProject.Log..txt");
-
-      Log.Logger = new LoggerConfiguration()
-        .MinimumLevel.Debug()
-        .WriteTo.File(logFilePath, rollingInterval: RollingInterval.Day)
-        .WriteTo.Console()
-        .CreateLogger();
-    }
   }
 }

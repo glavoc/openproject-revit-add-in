@@ -5,9 +5,11 @@ namespace OpenProject.Shared
 {
   public static class ConfigurationConstant
   {
-    public static string OpenProjectApplicationData =
+    private const string _openProjectRevitAddInFolderName = "OpenProject.Revit";
+
+    public static readonly string OpenProjectApplicationData =
       Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-        "OpenProject.Revit");
+        _openProjectRevitAddInFolderName);
   }
 }
