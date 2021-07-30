@@ -10,24 +10,21 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Assets\openproject.ico"/>
+    <None Remove="Assets\openproject.ico" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\OpenProject\OpenProject.csproj"/>
+    <ProjectReference Include="..\OpenProject\OpenProject.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="Assets\openproject.ico"/>
+    <Resource Include="Assets\openproject.ico" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="cef.redist.x64" Version="79.1.35"/>
-    <PackageReference Include="CefSharp.Common" Version="79.1.350"/>
-    <PackageReference Include="CefSharp.Wpf" Version="79.1.350"/>
-    <PackageReference Include="Serilog" Version="2.10.0"/>
-    <PackageReference Include="Serilog.Sinks.Console" Version="4.0.0"/>
-    <PackageReference Include="Serilog.Sinks.File" Version="5.0.0"/>
+    <PackageReference Include="cef.redist.x64" Version="79.1.35" />
+    <PackageReference Include="CefSharp.Common" Version="79.1.350" />
+    <PackageReference Include="CefSharp.Wpf" Version="79.1.350" />
 
     <!-- Solving loader bug according to https://github.com/cefsharp/CefSharp/issues/3031 -->
     <Reference Update="CefSharp">

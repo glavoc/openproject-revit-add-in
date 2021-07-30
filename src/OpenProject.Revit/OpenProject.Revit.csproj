@@ -37,9 +37,6 @@
     <PackageReference Condition="'$(Revit2021)' == true" Include="Revit_All_Main_Versions_API_x64" Version="2021.0.0" />
     <PackageReference Condition="'$(Revit2020)' == true" Include="Revit_All_Main_Versions_API_x64" Version="2020.0.1" />
     <PackageReference Condition="'$(Revit2019)' == true" Include="Revit_All_Main_Versions_API_x64" Version="2019.0.1" />
-    <PackageReference Include="Serilog" Version="2.10.0" />
-    <PackageReference Include="Serilog.Sinks.Console" Version="4.0.0" />
-    <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
     <PackageReference Include="ZetaIpc" Version="1.0.0.9" />
   </ItemGroup>
 

@@ -6,8 +6,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.UI;
-using OpenProject.Shared;
-using Serilog;
+using OpenProject.Shared.Logging;
 
 namespace OpenProject.Revit.Entry
 {
@@ -27,7 +26,7 @@ namespace OpenProject.Revit.Entry
     {
       try
       {
-        ConfigureLogger();
+        Logger.ConfigureLogger("OpenProject.Revit.Log..txt");
 
         // Tab
         const string tabName = "OpenProject";
@@ -71,20 +70,6 @@ namespace OpenProject.Revit.Entry
       return Result.Succeeded;
     }
 
-    private void ConfigureLogger()
-    {
-      var logFilePath = Path.Combine(
-        ConfigurationConstant.OpenProjectApplicationData,
-        "logs",
-        "OpenProject.Revit.Log..txt");
-
-      Log.Logger = new LoggerConfiguration()
-        .MinimumLevel.Debug()
-        .WriteTo.File(logFilePath, rollingInterval: RollingInterval.Day)
-        .WriteTo.Console()
-        .CreateLogger();
-    }
-
     /// <summary>
     /// Shut Down
     /// </summary>
@@ -107,19 +92,6 @@ namespace OpenProject.Revit.Entry
     #endregion
 
     #region Private Members
-
-    /// <summary>
-    /// Get System Architecture
-    /// </summary>
-    /// <returns></returns>
-    static string ProgramFilesx86()
-    {
-      if (8 == IntPtr.Size || (!String.IsNullOrEmpty(Environment.GetEnvironmentVariable("PROCESSOR_ARCHITEW6432"))))
-        return Environment.GetEnvironmentVariable("ProgramFiles(x86)");
-
-      return Environment.GetEnvironmentVariable("ProgramFiles");
-    }
-
 
     /// <summary>
     /// Load an Image Source from File
@@ -145,6 +117,7 @@ namespace OpenProject.Revit.Entry
       }
       catch
       {
+        // ignored
       }
 
       // Fail
