@@ -1,6 +1,5 @@
 ﻿using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
-using Autodesk.Revit.UI.Events;
 using OpenProject.Revit.Data;
 using OpenProject.Revit.Extensions;
 using OpenProject.Shared;
@@ -88,21 +87,9 @@ namespace OpenProject.Revit.Entry
         Log.Information("Applying clipping plane information ...");
         ApplyClippingPlanes(_bcfViewpoint, uiDoc);
 
-        // The local callback first needs to be initialized to null since it's
-        // referencing itself in its body.
-        // The reason for this is that we need to wait for Revit to load the view
-        // and prepare everything. After that, we're waiting for the 'Idle' event
-        // and instruct Revit to refresh and redraw the view. Otherwise, component
-        // selection seemed not to work properly.
-        void AfterIdleEventHandler(object o, IdlingEventArgs idlingEventArgs)
-        {
-          uiDoc.RefreshActiveView();
-          app.ActiveUIDocument.UpdateAllOpenViews();
-          Log.Information("Finished updating all open views after loading BCF viewpoint.");
-          app.Idling -= AfterIdleEventHandler;
-        }
-
-        app.Idling += AfterIdleEventHandler;
+        uiDoc.RefreshActiveView();
+        // app.ActiveUIDocument.UpdateAllOpenViews();
+        Log.Information("Finished updating all open views after loading BCF viewpoint.");
       }
       catch (Exception ex)
       {
