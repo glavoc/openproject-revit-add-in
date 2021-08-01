@@ -1,5 +1,6 @@
 ﻿using System;
 using CefSharp;
+using Serilog;
 
 namespace OpenProject.WebViewIntegration
 {
@@ -12,6 +13,8 @@ namespace OpenProject.WebViewIntegration
     public void OnBeforeDownload(IWebBrowser chromiumWebBrowser, IBrowser browser, DownloadItem downloadItem,
       IBeforeDownloadCallback callback)
     {
+      Log.Information("Download triggered for item '{name}'", downloadItem.SuggestedFileName);
+
       OnBeforeDownloadFired?.Invoke(this, downloadItem);
 
       if (callback.IsDisposed) return;

@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Windows;
 using Microsoft.Extensions.DependencyInjection;
+using OpenProject.Shared.Logging;
 using OpenProject.Windows.Services;
+using Serilog;
 
 namespace OpenProject.Windows
 {
@@ -17,8 +19,14 @@ namespace OpenProject.Windows
       _serviceProvider = ServiceProviderConfiguration
         .ConfigureIoCContainer()
         .BuildServiceProvider();
+
+      Logger.ConfigureLogger("OpenProject.Log..txt");
     }
 
-    private void OnStartUp(object sender, StartupEventArgs e) => _serviceProvider.GetService<MainWindowView>().Show();
+    private void OnStartUp(object sender, StartupEventArgs e)
+    {
+      Log.Information("OpenProject Browser for Revit started.");
+      _serviceProvider.GetService<MainWindowView>().Show();
+    }
   }
 }
