@@ -1,3 +1,4 @@
+using System;
 using CefSharp;
 using System.Diagnostics;
 using System.Linq;
@@ -12,53 +13,79 @@ namespace OpenProject.WebViewIntegration
   /// </summary>
   public class OpenProjectBrowserRequestHandler : IRequestHandler
   {
-    public bool GetAuthCredentials(IWebBrowser chromiumWebBrowser, IBrowser browser, string originUrl, bool isProxy, string host, int port, string realm, string scheme, IAuthCallback callback)
+    public bool GetAuthCredentials(IWebBrowser chromiumWebBrowser, IBrowser browser, string originUrl, bool isProxy,
+      string host, int port, string realm, string scheme, IAuthCallback callback)
     {
       return true;
     }
 
-    public IResourceRequestHandler GetResourceRequestHandler(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, IRequest request, bool isNavigation, bool isDownload, string requestInitiator, ref bool disableDefaultHandling)
+    public IResourceRequestHandler GetResourceRequestHandler(IWebBrowser chromiumWebBrowser, IBrowser browser,
+      IFrame frame, IRequest request, bool isNavigation, bool isDownload, string requestInitiator,
+      ref bool disableDefaultHandling)
     {
       return null;
     }
 
-    public bool OnBeforeBrowse(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, IRequest request, bool userGesture, bool isRedirect)
+    public bool OnBeforeBrowse(
+      IWebBrowser chromiumWebBrowser,
+      IBrowser browser,
+      IFrame frame,
+      IRequest request,
+      bool userGesture,
+      bool isRedirect)
     {
-      var url = request.Url;
+      if (ShouldOpenRequestInEmbeddedBrowser(request, isRedirect))
+        return false;
 
+      OpenRequestInStandardBrowser(request);
+      return true;
+    }
+
+    private static bool ShouldOpenRequestInEmbeddedBrowser(IRequest request, bool isRedirect)
+    {
+      // We're allowing all embedded requests to just go through
       if (request.ResourceType != ResourceType.MainFrame)
-      {
-        // We're allowing all embedded requests to just go through
-        return false;
-      }
+        return true;
 
-      var isValidLocalUrl = url.StartsWith("file://", System.StringComparison.InvariantCultureIgnoreCase)
-                            || url.StartsWith("devtools://", System.StringComparison.InvariantCultureIgnoreCase);
+      if (isRedirect)
+        return true;
+
+      var isValidLocalUrl = request.Url.StartsWith("file://", StringComparison.InvariantCultureIgnoreCase)
+                            || request.Url.StartsWith("devtools://", StringComparison.InvariantCultureIgnoreCase);
       if (isValidLocalUrl)
-      {
-        return false;
-      }
+        return true;
 
       var knownGoodUrls = ConfigurationHandler.LoadAllInstances();
-      var isValidExternalUrl = knownGoodUrls.Any(goodUrl => url.StartsWith(goodUrl, System.StringComparison.InvariantCultureIgnoreCase));
+      var isValidExternalUrl = knownGoodUrls.Any(goodUrl =>
+        request.Url.StartsWith(goodUrl, StringComparison.InvariantCultureIgnoreCase));
 
-      if (isValidExternalUrl)
-      {
-        return false;
-      }
-
-      var cmdUrl = url.Replace("&", "^&");
-      Process.Start(new ProcessStartInfo("cmd", $"/c start {cmdUrl}") { CreateNoWindow = true });
-
-      return true;
+      return isValidExternalUrl || IsRequestOnSameDomain(request);
     }
 
-    public bool OnCertificateError(IWebBrowser chromiumWebBrowser, IBrowser browser, CefErrorCode errorCode, string requestUrl, ISslInfo sslInfo, IRequestCallback callback)
+    private static void OpenRequestInStandardBrowser(IRequest request)
+    {
+      var cmdUrl = request.Url.Replace("&", "^&");
+      Process.Start(new ProcessStartInfo("cmd", $"/c start {cmdUrl}") { CreateNoWindow = true });
+    }
+
+    private static bool IsRequestOnSameDomain(IRequest request)
+    {
+      if (string.IsNullOrEmpty(request.ReferrerUrl)) return false;
+
+      var referrer = new Uri(request.ReferrerUrl);
+      var requestUrl = new Uri(request.Url);
+
+      return referrer.Host == requestUrl.Host;
+    }
+
+    public bool OnCertificateError(IWebBrowser chromiumWebBrowser, IBrowser browser, CefErrorCode errorCode,
+      string requestUrl, ISslInfo sslInfo, IRequestCallback callback)
     {
       return true;
     }
 
-    public bool OnOpenUrlFromTab(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, string targetUrl, WindowOpenDisposition targetDisposition, bool userGesture)
+    public bool OnOpenUrlFromTab(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, string targetUrl,
+      WindowOpenDisposition targetDisposition, bool userGesture)
     {
       return true;
     }
@@ -67,7 +94,8 @@ namespace OpenProject.WebViewIntegration
     {
     }
 
-    public bool OnQuotaRequest(IWebBrowser chromiumWebBrowser, IBrowser browser, string originUrl, long newSize, IRequestCallback callback)
+    public bool OnQuotaRequest(IWebBrowser chromiumWebBrowser, IBrowser browser, string originUrl, long newSize,
+      IRequestCallback callback)
     {
       return true;
     }
@@ -80,7 +108,8 @@ namespace OpenProject.WebViewIntegration
     {
     }
 
-    public bool OnSelectClientCertificate(IWebBrowser chromiumWebBrowser, IBrowser browser, bool isProxy, string host, int port, X509Certificate2Collection certificates, ISelectClientCertificateCallback callback)
+    public bool OnSelectClientCertificate(IWebBrowser chromiumWebBrowser, IBrowser browser, bool isProxy, string host,
+      int port, X509Certificate2Collection certificates, ISelectClientCertificateCallback callback)
     {
       return true;
     }
