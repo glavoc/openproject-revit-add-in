@@ -236,12 +236,12 @@ namespace OpenProject.Shared
       .Executes(() =>
       {
         DotNetPublish(c => c
-          .SetProject(RootDirectory / "src" / "OpenProject.Windows" / "OpenProject.Windows.csproj")
+          .SetProject(RootDirectory / "src" / "OpenProject.Browser" / "OpenProject.Browser.csproj")
           .SetConfiguration("Release x64")
           .SetAssemblyVersion(GitVersion.AssemblySemVer)
           .SetFileVersion(GitVersion.AssemblySemFileVer)
           .SetInformationalVersion(GitVersion.InformationalVersion)
-          .SetOutput(OutputDirectory / "OpenProject.Windows")
+          .SetOutput(OutputDirectory / "OpenProject.Browser")
           .SetSelfContained(true)
           .SetRuntime("win-x64"));
 

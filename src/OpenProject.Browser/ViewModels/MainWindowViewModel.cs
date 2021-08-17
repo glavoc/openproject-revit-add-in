@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Windows;
-using OpenProject.Views;
+using OpenProject.Browser.Views;
 
-namespace OpenProject.Windows
+namespace OpenProject.Browser.ViewModels
 {
   /// <summary>
   /// The view model for the main window control.

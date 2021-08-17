@@ -1,9 +1,9 @@
 ﻿using Moq;
 using OpenProject.Tests.Mocks;
-using OpenProject.WebViewIntegration;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
+using OpenProject.Browser.WebViewIntegration;
 using Xunit;
 
 namespace OpenProject.Tests.WebViewIntegration

@@ -1,16 +1,12 @@
-﻿using System;
-using System.IO;
-using System.Net.Http;
+﻿using System.Net.Http;
 using CefSharp;
 using CefSharp.Wpf;
 using Microsoft.Extensions.DependencyInjection;
-using OpenProject.Shared;
-using OpenProject.ViewModels;
-using OpenProject.Views;
-using OpenProject.WebViewIntegration;
-using Serilog;
+using OpenProject.Browser.ViewModels;
+using OpenProject.Browser.Views;
+using OpenProject.Browser.WebViewIntegration;
 
-namespace OpenProject.Windows.Services
+namespace OpenProject.Browser.Services
 {
   internal static class ServiceProviderConfiguration
   {

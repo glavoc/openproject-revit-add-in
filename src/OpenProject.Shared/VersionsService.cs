@@ -5,11 +5,11 @@ namespace OpenProject.Shared
     [System.CodeDom.Compiler.GeneratedCode("GitVersionBuild", "")]
     public static class VersionsService
     {
-        public static string Version => "2.2.5-chore-remove-unu0001";
-        public static string CommitInfo => "12.Branch.chore-remove-unused-code.Sha.431a71a0c2711be19095b4089c084a19fd932b21";
-        public static string CommitDate => "2021-07-22";
-        public static string CommitHash => "431a71a0c2711be19095b4089c084a19fd932b21";
-        public static string InformationalVersion => "2.2.5-chore-remove-unused-code.1+12.Branch.chore-remove-unused-code.Sha.431a71a0c2711be19095b4089c084a19fd932b21";
-        public static DateTime BuildDateUtc { get; } = new DateTime(2021, 7, 23, 15, 2, 49, DateTimeKind.Utc);
+        public static string Version => "2.2.5-chore-merge-brow0001";
+        public static string CommitInfo => "29.Branch.chore-merge-browser-project.Sha.a34ea85e41426135ba219fe71633526db88d407a";
+        public static string CommitDate => "2021-08-17";
+        public static string CommitHash => "a34ea85e41426135ba219fe71633526db88d407a";
+        public static string InformationalVersion => "2.2.5-chore-merge-browser-project.1+29.Branch.chore-merge-browser-project.Sha.a34ea85e41426135ba219fe71633526db88d407a";
+        public static DateTime BuildDateUtc { get; } = new DateTime(2021, 8, 17, 13, 57, 2, DateTimeKind.Utc);
     }
 }

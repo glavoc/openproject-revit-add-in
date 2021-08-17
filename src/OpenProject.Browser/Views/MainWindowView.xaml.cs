@@ -1,7 +1,8 @@
-﻿using OpenProject.WebViewIntegration;
-using System.Windows;
+﻿using System.Windows;
+using OpenProject.Browser.ViewModels;
+using OpenProject.Browser.WebViewIntegration;
 
-namespace OpenProject.Windows
+namespace OpenProject.Browser.Views
 {
   /// <summary>
   /// The view class for the main window.
