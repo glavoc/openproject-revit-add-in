@@ -1,6 +1,5 @@
 ﻿using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
-using Autodesk.Revit.UI.Events;
 using OpenProject.Revit.Data;
 using OpenProject.Revit.Extensions;
 using OpenProject.Shared;
@@ -67,11 +66,6 @@ namespace OpenProject.Revit.Entry
       try
       {
         Log.Information("Opening BCF Viewpoint ...");
-
-        UIDocument uiDoc = app.ActiveUIDocument;
-        Document doc = uiDoc.Document;
-
-        Log.Information("Opening related OpenProject view ...");
         var hasCamera = _bcfViewpoint.GetCamera().Match(
           camera => ShowOpenProjectView(app, camera),
           () => false);
@@ -81,28 +75,14 @@ namespace OpenProject.Revit.Entry
           return;
         }
 
-        Log.Information("Applying object visibility ...");
+        UIDocument uiDoc = app.ActiveUIDocument;
         DeselectAndUnhideElements(uiDoc);
-        Log.Information("Applying object styles ...");
-        ApplyElementStyles(_bcfViewpoint, doc, uiDoc);
-        Log.Information("Applying clipping plane information ...");
+        ApplyElementStyles(_bcfViewpoint, uiDoc);
         ApplyClippingPlanes(_bcfViewpoint, uiDoc);
 
-        // The local callback first needs to be initialized to null since it's
-        // referencing itself in its body.
-        // The reason for this is that we need to wait for Revit to load the view
-        // and prepare everything. After that, we're waiting for the 'Idle' event
-        // and instruct Revit to refresh and redraw the view. Otherwise, component
-        // selection seemed not to work properly.
-        void AfterIdleEventHandler(object o, IdlingEventArgs idlingEventArgs)
-        {
-          uiDoc.RefreshActiveView();
-          app.ActiveUIDocument.UpdateAllOpenViews();
-          Log.Information("Finished updating all open views after loading BCF viewpoint.");
-          app.Idling -= AfterIdleEventHandler;
-        }
-
-        app.Idling += AfterIdleEventHandler;
+        Log.Information("Refreshing active UI view in Revit ...");
+        uiDoc.RefreshActiveView();
+        Log.Information("Finished updating all open views after loading BCF viewpoint.");
       }
       catch (Exception ex)
       {
@@ -113,6 +93,8 @@ namespace OpenProject.Revit.Entry
 
     private static bool ShowOpenProjectView(UIApplication app, Camera camera)
     {
+      Log.Information("Opening related OpenProject view ...");
+
       Document doc = app.ActiveUIDocument.Document;
       View3D openProjectView = doc.GetOpenProjectView(camera.Type);
 
@@ -123,6 +105,7 @@ namespace OpenProject.Revit.Entry
       ViewOrientation3D orient3D =
         RevitUtils.ConvertBasePoint(doc, cameraViewPoint, cameraDirection, cameraUpVector, true);
 
+      Log.Information("Starting transaction to apply viewpoint orientation ...");
       using var trans = new Transaction(doc);
       if (trans.Start("Apply view camera") == TransactionStatus.Started)
       {
@@ -138,8 +121,10 @@ namespace OpenProject.Revit.Entry
         openProjectView.SetOrientation(orient3D);
       }
 
+      Log.Information("Committing transaction to apply viewpoint orientation ...");
       trans.Commit();
 
+      Log.Information("Setting new view as active view of current UI document ...");
       app.ActiveUIDocument.ActiveView = openProjectView;
 
       if (camera.Type == CameraType.Orthogonal && camera is OrthogonalCamera orthoCam)
@@ -148,11 +133,13 @@ namespace OpenProject.Revit.Entry
           orthoCam.ViewToWorldScale);
       }
 
+      Log.Information("Finished opening OpenProject view of type {cameraType}", camera.Type.ToString());
       return true;
     }
 
     private static void DeselectAndUnhideElements(UIDocument uiDocument)
     {
+      Log.Information("Applying object visibility ...");
       Document document = uiDocument.Document;
 
       using var transaction = new Transaction(uiDocument.Document);
@@ -170,18 +157,24 @@ namespace OpenProject.Revit.Entry
 
         if (hiddenRevitElements.Any())
         {
+          Log.Information("Unhide {n} elements ...", hiddenRevitElements.Count);
           // Resetting hidden elements to show all elements in the model
           document.ActiveView.UnhideElements(hiddenRevitElements);
         }
       }
 
+      Log.Information("Committing transaction to apply object visibility ...");
       transaction.Commit();
+      Log.Information("Finished applying object visibility.");
     }
 
-    private static void ApplyElementStyles(BcfViewpointViewModel bcfViewpoint, Document document, UIDocument uiDocument)
+    private static void ApplyElementStyles(BcfViewpointViewModel bcfViewpoint, UIDocument uiDocument)
     {
       if (bcfViewpoint.Components?.Visibility == null)
         return;
+
+      Log.Information("Applying object styles ...");
+      Document document = uiDocument.Document;
 
       var visibleRevitElements = new FilteredElementCollector(document, document.ActiveView.Id)
         .WhereElementIsNotElementType()
@@ -222,11 +215,16 @@ namespace OpenProject.Revit.Entry
             .ToList();
 
           if (selectedElements.Any())
+          {
+            Log.Information("Select {n} elements ...", selectedElements.Count);
             uiDocument.Selection.SetElementIds(selectedElements);
+          }
         }
       }
 
+      Log.Information("Committing transaction to apply object styles ...");
       trans.Commit();
+      Log.Information("Finished applying object styles.");
     }
 
     private static void ApplyClippingPlanes(BcfViewpointViewModel bcfViewpoint, UIDocument uiDocument)
@@ -234,6 +232,7 @@ namespace OpenProject.Revit.Entry
       if (uiDocument.ActiveView is not View3D view3d)
         return;
 
+      Log.Information("Applying clipping plane information ...");
       var clippingPlanes = bcfViewpoint.Viewpoint?.Clipping_planes ?? new List<Clipping_plane>();
 
       AxisAlignedBoundingBox boundingBox = clippingPlanes
@@ -243,6 +242,7 @@ namespace OpenProject.Revit.Entry
       using var trans = new Transaction(uiDocument.Document);
       if (!boundingBox.Equals(AxisAlignedBoundingBox.Infinite))
       {
+        Log.Information("Found axis aligned clipping planes. Start transaction to set resulting section box ...");
         if (trans.Start("Apply BCF section box") == TransactionStatus.Started)
         {
           view3d.SetSectionBox(ToRevitSectionBox(boundingBox));
@@ -251,23 +251,26 @@ namespace OpenProject.Revit.Entry
       }
       else
       {
+        Log.Information("Found no axis aligned clipping planes. Start transaction to disable section box ...");
         if (trans.Start("Disable section box") == TransactionStatus.Started)
           view3d.IsSectionBoxActive = false;
       }
 
+      Log.Information("Committing transaction to apply clipping plane information ...");
       trans.Commit();
+      Log.Information("Finished applying clipping plane information.");
     }
 
     private static BoundingBoxXYZ ToRevitSectionBox(AxisAlignedBoundingBox box)
     {
       var min = new XYZ(
-        box.Min.X == decimal.MinValue ? double.MinValue : ((double) box.Min.X).ToInternalRevitUnit(),
-        box.Min.Y == decimal.MinValue ? double.MinValue : ((double) box.Min.Y).ToInternalRevitUnit(),
-        box.Min.Z == decimal.MinValue ? double.MinValue : ((double) box.Min.Z).ToInternalRevitUnit());
+        box.Min.X == decimal.MinValue ? double.MinValue : ((double)box.Min.X).ToInternalRevitUnit(),
+        box.Min.Y == decimal.MinValue ? double.MinValue : ((double)box.Min.Y).ToInternalRevitUnit(),
+        box.Min.Z == decimal.MinValue ? double.MinValue : ((double)box.Min.Z).ToInternalRevitUnit());
       var max = new XYZ(
-        box.Max.X == decimal.MaxValue ? double.MaxValue : ((double) box.Max.X).ToInternalRevitUnit(),
-        box.Max.Y == decimal.MaxValue ? double.MaxValue : ((double) box.Max.Y).ToInternalRevitUnit(),
-        box.Max.Z == decimal.MaxValue ? double.MaxValue : ((double) box.Max.Z).ToInternalRevitUnit());
+        box.Max.X == decimal.MaxValue ? double.MaxValue : ((double)box.Max.X).ToInternalRevitUnit(),
+        box.Max.Y == decimal.MaxValue ? double.MaxValue : ((double)box.Max.Y).ToInternalRevitUnit(),
+        box.Max.Z == decimal.MaxValue ? double.MaxValue : ((double)box.Max.Z).ToInternalRevitUnit());
 
       return new BoundingBoxXYZ { Min = min, Max = max };
     }

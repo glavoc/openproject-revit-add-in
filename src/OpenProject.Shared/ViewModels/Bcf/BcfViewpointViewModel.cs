@@ -30,7 +30,7 @@ namespace OpenProject.Shared.ViewModels.Bcf
       if (Viewpoint?.Perspective_camera != null)
       {
         var c = new PerspectiveCamera();
-        var bcfPerspective = Viewpoint.Perspective_camera;
+        Perspective_camera bcfPerspective = Viewpoint.Perspective_camera;
 
         c.FieldOfView = Convert.ToDecimal(bcfPerspective.Field_of_view);
         c.Direction = bcfPerspective.Camera_direction.ToVector3();
@@ -43,7 +43,7 @@ namespace OpenProject.Shared.ViewModels.Bcf
       if (Viewpoint?.Orthogonal_camera != null)
       {
         var c = new OrthogonalCamera();
-        var bcfOrthogonal = Viewpoint.Orthogonal_camera;
+        Orthogonal_camera bcfOrthogonal = Viewpoint.Orthogonal_camera;
 
         c.ViewToWorldScale = Convert.ToDecimal(bcfOrthogonal.View_to_world_scale);
         c.Direction = bcfOrthogonal.Camera_direction.ToVector3();

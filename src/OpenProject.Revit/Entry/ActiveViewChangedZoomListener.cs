@@ -4,6 +4,7 @@ using Autodesk.Revit.UI.Events;
 using System;
 using System.Linq;
 using OpenProject.Revit.Data;
+using Serilog;
 
 namespace OpenProject.Revit.Entry
 {
@@ -45,10 +46,13 @@ namespace OpenProject.Revit.Entry
           .Subtract(activeView.UpDirection.Multiply(zoomedViewBoxHeight / 2))
           .Subtract(activeView.RightDirection.Multiply(zoomedViewBoxWidth / 2));
 
+        Log.Information("Zoom to {topRight} | {bottomLeft} ...", newTopRight.ToString(), newBottomLeft.ToString());
         currentView.ZoomAndCenterRectangle(newTopRight, newBottomLeft);
+        Log.Information("Finished applying zoom for orthogonal view.");
         app.Idling -= Callback;
       }
 
+      Log.Information("Append zoom callback for orthogonal view to idle state of Revit application ...");
       app.Idling += Callback;
     }
   }
