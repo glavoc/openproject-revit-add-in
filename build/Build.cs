@@ -138,7 +138,7 @@ class Build : NukeBuild
         Directory.CreateDirectory(OutputDirectory);
       }
 
-      var landingPageFolder = RootDirectory / "src" / "OpenProject" / "WebViewIntegration" / "LandingPage";
+      var landingPageFolder = RootDirectory / "src" / "OpenProject.Browser" / "WebViewIntegration" / "LandingPage";
       var landingPageIndexPath = landingPageFolder / "index.html";
       var originalLandingPageIndexContent = ReadAllText(landingPageIndexPath);
       try
