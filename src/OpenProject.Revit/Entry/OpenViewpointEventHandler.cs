@@ -105,6 +105,7 @@ namespace OpenProject.Revit.Entry
       ViewOrientation3D orient3D =
         RevitUtils.ConvertBasePoint(doc, cameraViewPoint, cameraDirection, cameraUpVector, true);
 
+
       Log.Information("Starting transaction to apply viewpoint orientation ...");
       using var trans = new Transaction(doc);
       if (trans.Start("Apply view camera") == TransactionStatus.Started)

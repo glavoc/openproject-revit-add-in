@@ -82,7 +82,7 @@ namespace OpenProject.Revit.Entry
         // The configuration can be used to override the path, if there's no valid file given then
         // the default installation location is used
         var defaultInstallationPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
-          "OpenProject Revit AddIn", "OpenProject.Windows.exe");
+          "OpenProject Revit AddIn", "OpenProject.Browser.exe");
         bcfierWinProcessPath = defaultInstallationPath;
       }
 

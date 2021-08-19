@@ -57,15 +57,14 @@
   </ItemGroup>
 
   <Target Name="CopyWindowsApp" AfterTargets="Build" Condition="$(Configuration.Contains('Debug')) And '$(BuildingInsideVisualStudio)' == 'true'">
-    <Exec Command="dotnet build -c Debug -o bin/TempDebug" WorkingDirectory="$(MSBuildThisFileDirectory)\..\..\src\OpenProject.Windows" />
+    <Exec Command="dotnet build -c Debug -o bin/TempDebug" WorkingDirectory="$(MSBuildThisFileDirectory)\..\..\src\OpenProject.Browser" />
     <ItemGroup>
       <SourceDLLs Include="$(TargetDir)**\*.*" />
       <SourceManifest Include="$(TargetDir)*.addin" />
-      <OpenProjectWin Include="$(SolutionDir)\src\OpenProject.Windows\bin\TempDebug\**\*.*" />
+      <OpenProjectWin Include="$(SolutionDir)\src\OpenProject.Browser\bin\TempDebug\**\*.*" />
     </ItemGroup>
     <Copy SourceFiles="@(SourceDLLs)" DestinationFolder="$(AppData)\Autodesk\REVIT\Addins\$(RevitVersion)\$(ProjectName)\%(RecursiveDir)" />
     <Copy SourceFiles="@(SourceManifest)" DestinationFolder="$(AppData)\Autodesk\REVIT\Addins\$(RevitVersion)\" />
-    <Copy SourceFiles="@(OpenProjectWin)" DestinationFolder="$(AppData)\Autodesk\REVIT\Addins\$(RevitVersion)\$(ProjectName)\OpenProject.Windows\%(RecursiveDir)" />
+    <Copy SourceFiles="@(OpenProjectWin)" DestinationFolder="$(AppData)\Autodesk\REVIT\Addins\$(RevitVersion)\$(ProjectName)\OpenProject.Browser\%(RecursiveDir)" />
   </Target>
-  
 </Project>

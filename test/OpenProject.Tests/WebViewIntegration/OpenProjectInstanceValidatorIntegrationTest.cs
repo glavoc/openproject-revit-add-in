@@ -1,7 +1,7 @@
 ﻿using System.Net.Http;
 using System.Threading.Tasks;
 using Moq;
-using OpenProject.WebViewIntegration;
+using OpenProject.Browser.WebViewIntegration;
 using Xunit;
 
 namespace OpenProject.Tests.WebViewIntegration

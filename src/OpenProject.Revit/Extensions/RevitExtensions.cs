@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Autodesk.Revit.DB;
 using OpenProject.Shared.Math3D.Enumeration;
+using Serilog;
 
 namespace OpenProject.Revit.Extensions
 {

@@ -22,7 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\OpenProject\OpenProject.csproj" />
+    <ProjectReference Include="..\..\src\OpenProject.Browser\OpenProject.Browser.csproj" />
   </ItemGroup>
 
 </Project>

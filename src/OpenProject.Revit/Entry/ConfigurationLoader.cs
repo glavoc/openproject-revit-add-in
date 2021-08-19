@@ -30,7 +30,7 @@ namespace OpenProject.Revit.Entry
       if (!File.Exists(bcfierWinExecutablePath))
       {
         throw new Exception(
-          $"The OpenProject.Windows.exe path in the configuration is given as: \"{bcfierWinExecutablePath}\", but the file could not be found.");
+          $"The OpenProject.Browser.exe path in the configuration is given as: \"{bcfierWinExecutablePath}\", but the file could not be found.");
       }
 
       return bcfierWinExecutablePath;
