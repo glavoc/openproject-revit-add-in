@@ -5,6 +5,7 @@ using OpenProject.Shared.ViewModels.Bcf;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using OpenProject.Shared.Math3D;
 
 namespace OpenProject.Revit.Data
 {
@@ -25,11 +26,12 @@ namespace OpenProject.Revit.Data
         //Corners of the active UI view
         XYZ bottomLeft = uiDoc.GetOpenUIViews()[0].GetZoomCorners()[0];
         XYZ topRight = uiDoc.GetOpenUIViews()[0].GetZoomCorners()[1];
+        ProjectPosition projectPosition = doc.ActiveProjectLocation.GetProjectPosition(XYZ.Zero);
 
         //It's a 3d view
         if (uiDoc.ActiveView.ViewType == ViewType.ThreeD)
         {
-          var view3D = (View3D) uiDoc.ActiveView;
+          var view3D = (View3D)uiDoc.ActiveView;
 
           // it is a orthogonal view
           if (!view3D.IsPerspective)
@@ -47,12 +49,16 @@ namespace OpenProject.Revit.Data
             //  zoomValue = zoomValue * 2.5;
             // **** CUSTOM VALUE FOR TEKLA **** //
 
-            ViewOrientation3D t = RevitUtils.ConvertBasePoint(doc, viewCenter, uiDoc.ActiveView.ViewDirection,
-              uiDoc.ActiveView.UpDirection, false);
+            Position cameraPosition = RevitUtils.TransformCameraPosition(
+              new ProjectPositionWrapper(projectPosition),
+              new Position(
+                viewCenter.ToVector3(),
+                uiDoc.ActiveView.ViewDirection.ToVector3(),
+                uiDoc.ActiveView.UpDirection.ToVector3()));
 
-            XYZ c = t.EyePosition;
-            XYZ vi = t.ForwardDirection;
-            XYZ up = t.UpDirection;
+            Vector3 c = cameraPosition.Center.ToMeters();
+            Vector3 vi = cameraPosition.Forward;
+            Vector3 up = cameraPosition.Up;
 
             bcfViewpoint.Viewpoint = new iabi.BCF.APIObjects.V21.Viewpoint_GET
             {
@@ -62,14 +68,16 @@ namespace OpenProject.Revit.Data
                 Camera_view_point =
                   new iabi.BCF.APIObjects.V21.Point
                   {
-                    X = Convert.ToSingle(c.X.ToMeters()),
-                    Y = Convert.ToSingle(c.Y.ToMeters()),
-                    Z = Convert.ToSingle(c.Z.ToMeters())
+                    X = Convert.ToSingle(c.X),
+                    Y = Convert.ToSingle(c.Y),
+                    Z = Convert.ToSingle(c.Z)
                   },
                 Camera_up_vector =
                   new iabi.BCF.APIObjects.V21.Direction
                   {
-                    X = Convert.ToSingle(up.X), Y = Convert.ToSingle(up.Y), Z = Convert.ToSingle(up.Z)
+                    X = Convert.ToSingle(up.X),
+                    Y = Convert.ToSingle(up.Y),
+                    Z = Convert.ToSingle(up.Z)
                   },
                 Camera_direction = new iabi.BCF.APIObjects.V21.Direction
                 {
@@ -85,12 +93,16 @@ namespace OpenProject.Revit.Data
           {
             XYZ viewCenter = uiDoc.ActiveView.Origin;
 
-            ViewOrientation3D t = RevitUtils.ConvertBasePoint(doc, viewCenter, uiDoc.ActiveView.ViewDirection,
-              uiDoc.ActiveView.UpDirection, false);
+            Position cameraPosition = RevitUtils.TransformCameraPosition(
+              new ProjectPositionWrapper(projectPosition),
+              new Position(
+                viewCenter.ToVector3(),
+                uiDoc.ActiveView.ViewDirection.ToVector3(),
+                uiDoc.ActiveView.UpDirection.ToVector3()));
 
-            XYZ c = t.EyePosition;
-            XYZ vi = t.ForwardDirection;
-            XYZ up = t.UpDirection;
+            Vector3 c = cameraPosition.Center.ToMeters();
+            Vector3 vi = cameraPosition.Forward;
+            Vector3 up = cameraPosition.Up;
 
             bcfViewpoint.Viewpoint = new iabi.BCF.APIObjects.V21.Viewpoint_GET
             {
@@ -100,18 +112,22 @@ namespace OpenProject.Revit.Data
                 Camera_view_point =
                   new iabi.BCF.APIObjects.V21.Point
                   {
-                    X = Convert.ToSingle(c.X.ToMeters()),
-                    Y = Convert.ToSingle(c.Y.ToMeters()),
-                    Z = Convert.ToSingle(c.Z.ToMeters())
+                    X = Convert.ToSingle(c.X),
+                    Y = Convert.ToSingle(c.Y),
+                    Z = Convert.ToSingle(c.Z)
                   },
                 Camera_up_vector =
                   new iabi.BCF.APIObjects.V21.Direction
                   {
-                    X = Convert.ToSingle(up.X), Y = Convert.ToSingle(up.Y), Z = Convert.ToSingle(up.Z)
+                    X = Convert.ToSingle(up.X),
+                    Y = Convert.ToSingle(up.Y),
+                    Z = Convert.ToSingle(up.Z)
                   },
                 Camera_direction = new iabi.BCF.APIObjects.V21.Direction
                 {
-                  X = Convert.ToSingle(vi.X * -1), Y = Convert.ToSingle(vi.Y * -1), Z = Convert.ToSingle(vi.Z * -1)
+                  X = Convert.ToSingle(vi.X * -1),
+                  Y = Convert.ToSingle(vi.Y * -1),
+                  Z = Convert.ToSingle(vi.Z * -1)
                 }
               }
             };

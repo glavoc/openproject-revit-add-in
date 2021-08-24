@@ -23,16 +23,13 @@ namespace OpenProject.Tests.Mocks
     private Task<HttpResponseMessage> GetMockResponse(HttpRequestMessage request, IDictionary<string, string> successResponses)
     {
       var code = HttpStatusCode.InternalServerError;
-      var content = "";
 
-      if (successResponses.TryGetValue(request.RequestUri.AbsoluteUri.ToLowerInvariant(), out content))
-      {
+      if (successResponses.TryGetValue(request.RequestUri.AbsoluteUri.ToLowerInvariant(), out var content))
         code = HttpStatusCode.OK;
-      }
 
       var response = new HttpResponseMessage(code)
       {
-        Content = new StringContent(content, Encoding.UTF8, "application/json")
+        Content = new StringContent(content ?? "", Encoding.UTF8, "application/json")
       };
       return Task.FromResult(response);
     }

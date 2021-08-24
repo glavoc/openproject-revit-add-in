@@ -98,13 +98,12 @@ namespace OpenProject.Revit.Entry
       Document doc = app.ActiveUIDocument.Document;
       View3D openProjectView = doc.GetOpenProjectView(camera.Type);
 
-      XYZ cameraViewPoint = RevitUtils.GetRevitXYZ(camera.Viewpoint);
-      XYZ cameraDirection = RevitUtils.GetRevitXYZ(camera.Direction);
-      XYZ cameraUpVector = RevitUtils.GetRevitXYZ(camera.UpVector);
-
-      ViewOrientation3D orient3D =
-        RevitUtils.ConvertBasePoint(doc, cameraViewPoint, cameraDirection, cameraUpVector, true);
-
+      ProjectPosition projectPosition = doc.ActiveProjectLocation.GetProjectPosition(XYZ.Zero);
+      var orient3D = RevitUtils.TransformCameraPosition(
+          new ProjectPositionWrapper(projectPosition),
+          camera.Position.ToInternalUnits(),
+          true)
+        .ToViewOrientation3D();
 
       Log.Information("Starting transaction to apply viewpoint orientation ...");
       using var trans = new Transaction(doc);

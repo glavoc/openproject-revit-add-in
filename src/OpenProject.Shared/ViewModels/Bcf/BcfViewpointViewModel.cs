@@ -33,9 +33,10 @@ namespace OpenProject.Shared.ViewModels.Bcf
         Perspective_camera bcfPerspective = Viewpoint.Perspective_camera;
 
         c.FieldOfView = Convert.ToDecimal(bcfPerspective.Field_of_view);
-        c.Direction = bcfPerspective.Camera_direction.ToVector3();
-        c.UpVector = bcfPerspective.Camera_up_vector.ToVector3();
-        c.Viewpoint = bcfPerspective.Camera_view_point.ToVector3();
+        c.Position = new Position(
+          bcfPerspective.Camera_view_point.ToVector3(),
+          bcfPerspective.Camera_direction.ToVector3(),
+          bcfPerspective.Camera_up_vector.ToVector3());
 
         camera = c;
       }
@@ -46,9 +47,10 @@ namespace OpenProject.Shared.ViewModels.Bcf
         Orthogonal_camera bcfOrthogonal = Viewpoint.Orthogonal_camera;
 
         c.ViewToWorldScale = Convert.ToDecimal(bcfOrthogonal.View_to_world_scale);
-        c.Direction = bcfOrthogonal.Camera_direction.ToVector3();
-        c.UpVector = bcfOrthogonal.Camera_up_vector.ToVector3();
-        c.Viewpoint = bcfOrthogonal.Camera_view_point.ToVector3();
+        c.Position = new Position(
+          bcfOrthogonal.Camera_view_point.ToVector3(),
+          bcfOrthogonal.Camera_direction.ToVector3(),
+          bcfOrthogonal.Camera_up_vector.ToVector3());
 
         camera = c;
       }

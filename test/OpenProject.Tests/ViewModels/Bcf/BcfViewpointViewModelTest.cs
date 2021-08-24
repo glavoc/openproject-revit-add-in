@@ -28,9 +28,10 @@ namespace OpenProject.Tests.ViewModels.Bcf
         },
         new OrthogonalCamera
         {
-          Direction = new Vector3(1, 1, 1),
-          UpVector = new Vector3(0, 1, -1),
-          Viewpoint = new Vector3(-1, 0, 0),
+          Position = new Position(
+            new Vector3(-1, 0, 0),
+            new Vector3(1, 1, 1),
+            new Vector3(0, 1, -1)),
           ViewToWorldScale = 42
         }
       };
@@ -53,9 +54,10 @@ namespace OpenProject.Tests.ViewModels.Bcf
         },
         new PerspectiveCamera
         {
-          Direction = new Vector3(1, 0, 1),
-          UpVector = new Vector3(0, -1, -1),
-          Viewpoint = new Vector3(0, -1, 0),
+          Position = new Position(
+            new Vector3(0, -1, 0),
+            new Vector3(1, 0, 1),
+            new Vector3(0, -1, -1)),
           FieldOfView = 92
         }
       };
