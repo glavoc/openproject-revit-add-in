@@ -24,7 +24,7 @@ namespace OpenProject.Revit.Entry
     {
       try
       {
-        ShowBCfViewpointInternal2(app);
+        ShowBCfViewpointInternal(app);
       }
       catch (Exception ex)
       {
@@ -67,7 +67,7 @@ namespace OpenProject.Revit.Entry
       ExternalEvent.Raise();
     }
 
-    private void ShowBCfViewpointInternal2(UIApplication app)
+    private void ShowBCfViewpointInternal(UIApplication app)
     {
       UIDocument uiDocument = app.ActiveUIDocument;
       var hasCamera = _bcfViewpoint.GetCamera().Match(
