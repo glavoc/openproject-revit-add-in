@@ -52,9 +52,6 @@ namespace OpenProject.Revit.Extensions
         _ => throw new ArgumentOutOfRangeException(nameof(type), type, "invalid camera type")
       };
 
-      var views = doc.Get3DViews();
-      var familyViews = doc.GetFamilyViews();
-
       View3D openProjectView = doc.Get3DViews().FirstOrDefault(view => view.Name == viewName);
       if (openProjectView != null)
       {
