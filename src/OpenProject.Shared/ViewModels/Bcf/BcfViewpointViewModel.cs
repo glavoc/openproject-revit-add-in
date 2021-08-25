@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Dangl;
 using iabi.BCF.APIObjects.V21;
 using OpenProject.Shared.BcfApi;
@@ -57,5 +58,25 @@ namespace OpenProject.Shared.ViewModels.Bcf
 
       return camera.SomeNotNull();
     }
+
+    /// <summary>
+    /// Gets the list of visibility exceptions or an empty list if any path element is null.
+    /// </summary>
+    public List<Component> GetVisibilityExceptions() => Components?.Visibility?.Exceptions ?? new List<Component>();
+
+    /// <summary>
+    /// Gets the visibility default, or false, if any path element is null.
+    /// </summary>
+    public bool GetVisibilityDefault() => Components?.Visibility?.Default_visibility ?? false;
+
+    /// <summary>
+    /// Gets the list of selected components or an empty list if any path element is null.
+    /// </summary>
+    public List<Component> GetSelection() => Components?.Selection ?? new List<Component>();
+
+    /// <summary>
+    /// Gets the list of viewpoint clipping planes or an empty list if any path element is null.
+    /// </summary>
+    public List<Clipping_plane> GetClippingPlanes() => Viewpoint?.Clipping_planes ?? new List<Clipping_plane>();
   }
 }

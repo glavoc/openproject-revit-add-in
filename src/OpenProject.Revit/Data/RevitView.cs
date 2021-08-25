@@ -43,12 +43,6 @@ namespace OpenProject.Revit.Data
 
             var (viewBoxHeight, _) = RevitUtils.ConvertToViewBoxValues(topRight, bottomLeft, view3D.RightDirection);
 
-            // **** CUSTOM VALUE FOR TEKLA **** //
-            // calculated experimentally, not sure why but it works
-            //if (UserSettings.Get("optTekla") == "1")
-            //  zoomValue = zoomValue * 2.5;
-            // **** CUSTOM VALUE FOR TEKLA **** //
-
             Position cameraPosition = RevitUtils.TransformCameraPosition(
               new ProjectPositionWrapper(projectPosition),
               new Position(

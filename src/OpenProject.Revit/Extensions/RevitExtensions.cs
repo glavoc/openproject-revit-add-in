@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Autodesk.Revit.DB;
+using OpenProject.Shared;
 using OpenProject.Shared.Math3D.Enumeration;
 using Serilog;
 
@@ -14,6 +15,25 @@ namespace OpenProject.Revit.Extensions
   {
     private const string _openProjectOrthogonalViewName = "OpenProject Orthogonal";
     private const string _openProjectPerspectiveViewName = "OpenProject Perspective";
+
+    /// <summary>
+    /// Creates a map between revit element ids and their IFC GUIDs inside the given document.
+    /// </summary>
+    /// <param name="doc">A revit document</param>
+    /// <param name="elements">A list of element ids</param>
+    /// <returns>The map between IFC GUIDs and revit element ids.</returns>
+    public static Dictionary<string, ElementId> GetIfcGuidElementIdMap(this Document doc, IEnumerable<ElementId> elements)
+    {
+      var map = new Dictionary<string, ElementId>();
+      foreach (ElementId element in elements)
+      {
+        var ifcGuid = IfcGuid.ToIfcGuid(ExportUtils.GetExportId(doc, element));
+        if (!map.ContainsKey(ifcGuid))
+          map.Add(ifcGuid, element);
+      }
+
+      return map;
+    }
 
     /// <summary>
     /// Gets the correct 3D view for displaying OpenProject content. The type of the view is dependent of the requested
@@ -32,9 +52,17 @@ namespace OpenProject.Revit.Extensions
         _ => throw new ArgumentOutOfRangeException(nameof(type), type, "invalid camera type")
       };
 
-      View3D openProjectView = doc.Get3DViews().FirstOrDefault(view => view.Name == viewName);
-      if (openProjectView != null) return openProjectView;
+      var views = doc.Get3DViews();
+      var familyViews = doc.GetFamilyViews();
 
+      View3D openProjectView = doc.Get3DViews().FirstOrDefault(view => view.Name == viewName);
+      if (openProjectView != null)
+      {
+        Log.Information("View '{name}' already existent. Finished getting related view.", viewName);
+        return openProjectView;
+      }
+
+      Log.Information("View '{name}' doesn't exist yet. Creating new view ...", viewName);
       using var trans = new Transaction(doc);
       trans.Start("Create open project view");
 
@@ -46,6 +74,8 @@ namespace OpenProject.Revit.Extensions
       };
 
       openProjectView.Name = viewName;
+      openProjectView.CropBoxActive = false;
+      openProjectView.CropBoxVisible = false;
       openProjectView.DetailLevel = ViewDetailLevel.Fine;
       openProjectView.DisplayStyle = DisplayStyle.Realistic;
 
@@ -55,6 +85,7 @@ namespace OpenProject.Revit.Extensions
 
       trans.Commit();
 
+      Log.Information("View '{name}' created. Finished getting related view.", viewName);
       return openProjectView;
     }
 
