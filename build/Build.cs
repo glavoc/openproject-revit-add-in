@@ -225,7 +225,7 @@ namespace OpenProject.Shared
             .SetConfiguration("Debug")
             .SetProjectFile(RootDirectory / "test" / "OpenProject.Tests" / "OpenProject.Tests.csproj")
             .SetTestAdapterPath(".")
-            .SetLogger($"xunit;LogFilePath={OutputDirectory / "testresults.xml"}"));
+            .SetLoggers($"xunit;LogFilePath={OutputDirectory / "testresults.xml"}"));
         });
 
   Target CompileReleaseConfigurations => _ => _

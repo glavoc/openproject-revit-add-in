@@ -37,7 +37,7 @@
     <PackageReference Condition="'$(Revit2021)' == true" Include="Revit_All_Main_Versions_API_x64" Version="2021.0.0" />
     <PackageReference Condition="'$(Revit2020)' == true" Include="Revit_All_Main_Versions_API_x64" Version="2020.0.1" />
     <PackageReference Condition="'$(Revit2019)' == true" Include="Revit_All_Main_Versions_API_x64" Version="2019.0.1" />
-    <PackageReference Include="ZetaIpc" Version="1.0.0.9" />
+    <PackageReference Include="ZetaIpc" Version="1.0.0.11" />
   </ItemGroup>
 
   <ItemGroup>

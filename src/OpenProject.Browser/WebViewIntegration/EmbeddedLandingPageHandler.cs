@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Security.Cryptography;
 using OpenProject.Shared;
+using Serilog;
 
 namespace OpenProject.Browser.WebViewIntegration
 {
@@ -12,8 +13,10 @@ namespace OpenProject.Browser.WebViewIntegration
   {
     public static string GetEmbeddedLandingPageIndexUrl()
     {
+      Log.Debug("Fetching landing page url ...");
       var indexFilePath = GetIndexFilePath();
 
+      Log.Debug("Fetched landing page url (file:///{url}).", indexFilePath);
       return $"file:///{indexFilePath}";
     }
 
@@ -70,7 +73,7 @@ namespace OpenProject.Browser.WebViewIntegration
 
     private static Stream GetEmbeddedResourceZipStream()
     {
-      const string resourceName = "OpenProject.WebViewIntegration.LandingPage.LandingPage.zip";
+      const string resourceName = "OpenProject.Browser.WebViewIntegration.LandingPage.LandingPage.zip";
       return Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName);
     }
   }

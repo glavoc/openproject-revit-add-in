@@ -42,6 +42,10 @@ namespace OpenProject.Browser.WebViewIntegration
       return true;
     }
 
+    public void OnDocumentAvailableInMainFrame(IWebBrowser chromiumWebBrowser, IBrowser browser)
+    {
+    }
+
     private static bool ShouldOpenRequestInEmbeddedBrowser(IRequest request, bool isRedirect)
     {
       // We're allowing all embedded requests to just go through

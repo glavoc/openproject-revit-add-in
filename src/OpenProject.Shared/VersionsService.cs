@@ -5,11 +5,11 @@ namespace OpenProject.Shared
     [System.CodeDom.Compiler.GeneratedCode("GitVersionBuild", "")]
     public static class VersionsService
     {
-        public static string Version => "2.2.5-chore-merge-brow0002";
-        public static string CommitInfo => "33.Branch.chore-merge-browser-project.Sha.fc0cd1e6d2252f053a63d89963d4e1a2ba5068e8";
-        public static string CommitDate => "2021-08-18";
-        public static string CommitHash => "fc0cd1e6d2252f053a63d89963d4e1a2ba5068e8";
-        public static string InformationalVersion => "2.2.5-chore-merge-browser-project.2+33.Branch.chore-merge-browser-project.Sha.fc0cd1e6d2252f053a63d89963d4e1a2ba5068e8";
-        public static DateTime BuildDateUtc { get; } = new DateTime(2021, 8, 18, 11, 20, 9, DateTimeKind.Utc);
+        public static string Version => "2.2.5-bug-36268-upgrad0001";
+        public static string CommitInfo => "1.Branch.bug-36268-upgrade-cefsharp.Sha.7776e91dcece22d48ba8321d2135244eb498e90b";
+        public static string CommitDate => "2021-08-31";
+        public static string CommitHash => "7776e91dcece22d48ba8321d2135244eb498e90b";
+        public static string InformationalVersion => "2.2.5-bug-36268-upgrade-cefsharp.1+1.Branch.bug-36268-upgrade-cefsharp.Sha.7776e91dcece22d48ba8321d2135244eb498e90b";
+        public static DateTime BuildDateUtc { get; } = new DateTime(2021, 8, 31, 11, 25, 20, DateTimeKind.Utc);
     }
 }
