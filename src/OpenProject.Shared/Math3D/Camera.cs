@@ -9,19 +9,9 @@ namespace OpenProject.Shared.Math3D
   public abstract class Camera : IEquatable<Camera>
   {
     /// <summary>
-    /// The camera location, also named camera viewpoint.
+    /// The camera location and orientation.
     /// </summary>
-    public Vector3 Viewpoint { get; set; } = new Vector3(0, 0, 0);
-
-    /// <summary>
-    /// The camera view direction.
-    /// </summary>
-    public Vector3 Direction { get; set; } = new Vector3(0, 0, 0);
-
-    /// <summary>
-    /// The camera up vector.
-    /// </summary>
-    public Vector3 UpVector { get; set; } = new Vector3(0, 0, 0);
+    public Position Position { get; set; } = new Position();
 
     /// <summary>
     /// The camera type, which can be orthogonal or perspective.
@@ -33,9 +23,7 @@ namespace OpenProject.Shared.Math3D
     {
       if (other == null) return false;
 
-      return Viewpoint.Equals(other.Viewpoint) &&
-             Direction.Equals(other.Direction) &&
-             UpVector.Equals(other.UpVector) &&
+      return Position.Equals(other.Position) &&
              Type == other.Type;
     }
   }

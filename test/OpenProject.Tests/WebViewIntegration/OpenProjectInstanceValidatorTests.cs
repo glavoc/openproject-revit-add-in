@@ -8,14 +8,12 @@ using Xunit;
 
 namespace OpenProject.Tests.WebViewIntegration
 {
-  public static class OpenProjectInstanceValidatorTests
+  public class OpenProjectInstanceValidatorTests
   {
-    public class IsValidOpenProjectInstanceAsync
-    {
 
       private readonly OpenProjectInstanceValidator _validator;
 
-      public IsValidOpenProjectInstanceAsync()
+      public OpenProjectInstanceValidatorTests()
       {
         var successResponse = new Newtonsoft.Json.Linq.JObject
         {
@@ -148,6 +146,5 @@ namespace OpenProject.Tests.WebViewIntegration
         Assert.False(actual.isValid);
         Assert.Null(actual.instanceBaseUrl);
       }
-    }
   }
 }

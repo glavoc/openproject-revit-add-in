@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Dangl;
 using iabi.BCF.APIObjects.V21;
 using OpenProject.Shared.BcfApi;
@@ -33,9 +34,10 @@ namespace OpenProject.Shared.ViewModels.Bcf
         Perspective_camera bcfPerspective = Viewpoint.Perspective_camera;
 
         c.FieldOfView = Convert.ToDecimal(bcfPerspective.Field_of_view);
-        c.Direction = bcfPerspective.Camera_direction.ToVector3();
-        c.UpVector = bcfPerspective.Camera_up_vector.ToVector3();
-        c.Viewpoint = bcfPerspective.Camera_view_point.ToVector3();
+        c.Position = new Position(
+          bcfPerspective.Camera_view_point.ToVector3(),
+          bcfPerspective.Camera_direction.ToVector3(),
+          bcfPerspective.Camera_up_vector.ToVector3());
 
         camera = c;
       }
@@ -46,14 +48,35 @@ namespace OpenProject.Shared.ViewModels.Bcf
         Orthogonal_camera bcfOrthogonal = Viewpoint.Orthogonal_camera;
 
         c.ViewToWorldScale = Convert.ToDecimal(bcfOrthogonal.View_to_world_scale);
-        c.Direction = bcfOrthogonal.Camera_direction.ToVector3();
-        c.UpVector = bcfOrthogonal.Camera_up_vector.ToVector3();
-        c.Viewpoint = bcfOrthogonal.Camera_view_point.ToVector3();
+        c.Position = new Position(
+          bcfOrthogonal.Camera_view_point.ToVector3(),
+          bcfOrthogonal.Camera_direction.ToVector3(),
+          bcfOrthogonal.Camera_up_vector.ToVector3());
 
         camera = c;
       }
 
       return camera.SomeNotNull();
     }
+
+    /// <summary>
+    /// Gets the list of visibility exceptions or an empty list if any path element is null.
+    /// </summary>
+    public List<Component> GetVisibilityExceptions() => Components?.Visibility?.Exceptions ?? new List<Component>();
+
+    /// <summary>
+    /// Gets the visibility default, or false, if any path element is null.
+    /// </summary>
+    public bool GetVisibilityDefault() => Components?.Visibility?.Default_visibility ?? false;
+
+    /// <summary>
+    /// Gets the list of selected components or an empty list if any path element is null.
+    /// </summary>
+    public List<Component> GetSelection() => Components?.Selection ?? new List<Component>();
+
+    /// <summary>
+    /// Gets the list of viewpoint clipping planes or an empty list if any path element is null.
+    /// </summary>
+    public List<Clipping_plane> GetClippingPlanes() => Viewpoint?.Clipping_planes ?? new List<Clipping_plane>();
   }
 }

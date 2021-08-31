@@ -23,6 +23,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\OpenProject.Browser\OpenProject.Browser.csproj" />
+    <ProjectReference Include="..\..\src\OpenProject.Revit\OpenProject.Revit.csproj" />
   </ItemGroup>
 
 </Project>
