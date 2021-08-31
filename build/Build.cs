@@ -7,7 +7,6 @@ using Nuke.Common.Tooling;
 using Nuke.Common.Tools.DocFX;
 using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Tools.GitVersion;
-using Nuke.Common.Tools.MSBuild;
 using Nuke.Common.Tools.NuGet;
 using Nuke.Common.Tools.SignTool;
 using Nuke.Common.Utilities.Collections;
