@@ -1,23 +1,44 @@
-#Changelog
-### BCFier 2.2.0 - 07/08/2017
+# Changelog
 
-#### New Features
+This is the Changelog for the OpenProject Revit Add-in. It follows the guidelines described
+in https://keepachangelog.com/en/1.0.0/. The versions follow [semantic versioning](https://semver.org/).
 
-- implemented BCF 2.1 schema [#29](https://github.com/teocomi/BCFier/issues/29)
-- added *topic status* and *topic type* to UI and settings
-- removed *comment status* and *verbal status*
-- issues can be rearranged via [drag&drop interface](https://github.com/punker76/gong-wpf-dragdrop)
-- added support for *topic* *index* and *viewpoint* *index*: this value is set on save [#14](https://github.com/teocomi/BCFier/issues/14)
-- upgraded solution to Visual Studio 2017
-- merged and linkedAssemblyInfo files
+## [Unreleased]
 
-#### Bug Fixes
+### Added
 
-- exception raised when view is captured from schedule (Revit): now a friendly warning message will show, no workaround has been implemented to grab a snapshot of the schedule  [#12](https://github.com/teocomi/BCFier/issues/12)
+- Clipping plane direction is now specified according to the conventions of the BCF 3.0. Objects on the positive side of
+  the clipping plane are invisible, while objects on the negative side are rendered visible.
+- OpenProject Revit Add-in installer now contains the additional option to install the add-in into Revit 2022.
+- Downloading BCF issues now is possible from within the embedded browser in the Revit add-in. A file save dialog is
+  opened for selecting the download destination.
+- The runtime now does rudimentary logging. The logfiles are rolled over on a daily basis and are located in
+  the `%APPDATA%\OpenProject.Revit\logs` folder next to the configuration files.
 
+### Changed
 
-#### To Do
+- Importing any viewpoints (including those created by OpenProject BIM Edition's BCF viewer) do now try to import the
+  clipping planes of the viewpoint into Revit section boxes. Only clipping planes that are within 5 degrees of a
+  coordinate plane are considered valid input.
+- Viewpoints can now only be created when having an active 3D view in Revit.
+- OpenProject viewpoints are now opened in a dedicated view, `OpenProject Perspective` for viewpoints with a perspective
+  camera and `OpenProject Orthogonal` for viewpoints with a orthogonal camera.
 
-- support of extension.xsd
-- support of ReferenceLink
-- support of BimSnippet
+### Fixed
+
+- Instance validation with url schema prefix and without api path suffixes are now validated correctly in all
+  combinations.
+- Login via **Azure AD** or **Google** now works properly within the embedded browser.
+- Initial configuration of the OpenProject Revit Add-in no longer sets the developer tools of the embedded browser to
+  activated. In addition there is no longer a dummy instance added to configuration on first install.
+- Restoring an orthogonal viewpoint now scales the view correctly to the previously recorded view box height.
+- Loading times for viewpoints were slightly improved, on machines without enough capability the asynchronous zoom for
+  orthogonal viewpoints can take several seconds (see this
+  [official issue](https://thebuildingcoder.typepad.com/blog/2020/10/save-and-restore-3d-view-camera-settings.html)).
+- An issue was fixed, causing the cursor in input fields in the embedded browser vanishing occasionally. 
+
+## [2.2.5] - 2021-04-16
+
+### Added
+
+- Initial state of changelog
