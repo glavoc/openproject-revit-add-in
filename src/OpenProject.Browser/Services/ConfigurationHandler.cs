@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Windows;
 using Config.Net;
 using OpenProject.Browser.Settings;
+using Serilog;
 
 namespace OpenProject.Browser.Services
 {
@@ -11,10 +13,18 @@ namespace OpenProject.Browser.Services
   {
     static ConfigurationHandler()
     {
-      var configurationFilePath = GetConfigurationFilePath();
-      Settings = new ConfigurationBuilder<IOpenProjectSettings>()
-        .UseJsonFile(configurationFilePath)
-        .Build();
+      try
+      {
+        var configurationFilePath = GetConfigurationFilePath();
+        Settings = new ConfigurationBuilder<IOpenProjectSettings>()
+          .UseJsonFile(configurationFilePath)
+          .Build();
+      }
+      catch (Exception exception)
+      {
+        MessageHandler.ShowError(exception,
+          "Cannot fetch OpenProject application settings. Please contact an administrator.");
+      }
     }
 
     public static IOpenProjectSettings Settings { get; }

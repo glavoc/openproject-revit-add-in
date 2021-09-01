@@ -6,10 +6,10 @@ namespace OpenProject.Shared
     public static class VersionsService
     {
         public static string Version => "2.2.5-bug-36268-upgrad0001";
-        public static string CommitInfo => "3.Branch.bug-36268-upgrade-cefsharp.Sha.2ee3faa1da83671dd5269538f1875b160e7d06a4";
+        public static string CommitInfo => "Branch.bug-36268-upgrade-cefsharp.Sha.8cc6b1eb00e57e62d3b4d263cd41d1b6f6cbe6dd";
         public static string CommitDate => "2021-08-31";
-        public static string CommitHash => "2ee3faa1da83671dd5269538f1875b160e7d06a4";
-        public static string InformationalVersion => "2.2.5-bug-36268-upgrade-cefsharp.1+3.Branch.bug-36268-upgrade-cefsharp.Sha.2ee3faa1da83671dd5269538f1875b160e7d06a4";
-        public static DateTime BuildDateUtc { get; } = new DateTime(2021, 8, 31, 11, 50, 16, DateTimeKind.Utc);
+        public static string CommitHash => "8cc6b1eb00e57e62d3b4d263cd41d1b6f6cbe6dd";
+        public static string InformationalVersion => "2.2.5-bug-36268-upgrade-cefsharp.1+Branch.bug-36268-upgrade-cefsharp.Sha.8cc6b1eb00e57e62d3b4d263cd41d1b6f6cbe6dd";
+        public static DateTime BuildDateUtc { get; } = new DateTime(2021, 9, 1, 8, 23, 9, DateTimeKind.Utc);
     }
 }

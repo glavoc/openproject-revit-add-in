@@ -140,8 +140,7 @@ namespace OpenProject.Browser.WebViewIntegration
           catch (Exception e)
           {
             Log.Error(e, "error fetching landing page index url");
-            MessageBox.Show("Cannot open OpenProject settings. Please contact an administrator.", "ERROR",
-              MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageHandler.ShowError("Cannot open OpenProject settings. Please contact an administrator.");
           }
 
           break;
