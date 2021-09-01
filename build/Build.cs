@@ -7,7 +7,6 @@ using Nuke.Common.Tooling;
 using Nuke.Common.Tools.DocFX;
 using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Tools.GitVersion;
-using Nuke.Common.Tools.MSBuild;
 using Nuke.Common.Tools.NuGet;
 using Nuke.Common.Tools.SignTool;
 using Nuke.Common.Utilities.Collections;
@@ -225,7 +224,7 @@ namespace OpenProject.Shared
             .SetConfiguration("Debug")
             .SetProjectFile(RootDirectory / "test" / "OpenProject.Tests" / "OpenProject.Tests.csproj")
             .SetTestAdapterPath(".")
-            .SetLogger($"xunit;LogFilePath={OutputDirectory / "testresults.xml"}"));
+            .SetLoggers($"xunit;LogFilePath={OutputDirectory / "testresults.xml"}"));
         });
 
   Target CompileReleaseConfigurations => _ => _

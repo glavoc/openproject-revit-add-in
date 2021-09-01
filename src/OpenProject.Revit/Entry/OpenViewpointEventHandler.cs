@@ -77,8 +77,10 @@ namespace OpenProject.Revit.Entry
 
           LoadBcfViewpoint(uiDocument, camera);
 
-          ZoomIfNeeded(app, camera, uiDocument.ActiveView.Id);
+          uiDocument.RefreshActiveView();
+          Log.Information("Refreshed active view.");
 
+          ZoomIfNeeded(app, camera, uiDocument.ActiveView.Id);
           Log.Information("Finished loading BCF viewpoint.");
           return true;
         },
