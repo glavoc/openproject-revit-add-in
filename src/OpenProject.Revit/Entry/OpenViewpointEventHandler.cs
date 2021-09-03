@@ -76,18 +76,18 @@ namespace OpenProject.Revit.Entry
           Log.Information("Found camera type {t}, opening related OpenProject view ...", camera.Type.ToString());
           View3D openProjectView = uiDocument.Document.GetOpenProjectView(camera.Type);
 
-          if (!uiDocument.ActiveView.Id.Equals(openProjectView.Id))
-          {
-            Log.Information("Setting view '{t}' as active view ...", openProjectView.Name);
-            uiDocument.ActiveView = openProjectView;
-          }
-
           ResetView(uiDocument, openProjectView);
           Log.Information("Reset view '{v}'.", openProjectView.Name);
           ApplyViewOrientationAndVisibility(uiDocument, openProjectView, camera);
           Log.Information("Applied view orientation and visibility in '{v}'.", openProjectView.Name);
           ApplyClippingPlanes(uiDocument, openProjectView);
           Log.Information("Applied view point clipping planes in '{v}'.", openProjectView.Name);
+
+          if (!uiDocument.ActiveView.Id.Equals(openProjectView.Id))
+          {
+            Log.Information("Setting view '{t}' as active view ...", openProjectView.Name);
+            uiDocument.ActiveView = openProjectView;
+          }
 
           uiDocument.RefreshActiveView();
           Log.Information("Refreshed active view.");
