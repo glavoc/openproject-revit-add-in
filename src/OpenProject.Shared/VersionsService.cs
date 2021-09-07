@@ -5,11 +5,11 @@ namespace OpenProject.Shared
     [System.CodeDom.Compiler.GeneratedCode("GitVersionBuild", "")]
     public static class VersionsService
     {
-        public static string Version => "2.2.5-bug-36268-upgrad0001";
-        public static string CommitInfo => "Branch.bug-36268-upgrade-cefsharp.Sha.8cc6b1eb00e57e62d3b4d263cd41d1b6f6cbe6dd";
-        public static string CommitDate => "2021-08-31";
-        public static string CommitHash => "8cc6b1eb00e57e62d3b4d263cd41d1b6f6cbe6dd";
-        public static string InformationalVersion => "2.2.5-bug-36268-upgrade-cefsharp.1+Branch.bug-36268-upgrade-cefsharp.Sha.8cc6b1eb00e57e62d3b4d263cd41d1b6f6cbe6dd";
-        public static DateTime BuildDateUtc { get; } = new DateTime(2021, 9, 1, 8, 23, 9, DateTimeKind.Utc);
+        public static string Version => "2.2.5-38788-load-viewp0002";
+        public static string CommitInfo => "Branch.feature-38788-load-viewpoints-with-hidden-elements.Sha.83f85e3da537b65795795947105374dc7b1b8af2";
+        public static string CommitDate => "2021-09-03";
+        public static string CommitHash => "83f85e3da537b65795795947105374dc7b1b8af2";
+        public static string InformationalVersion => "2.2.5-38788-load-viewpoints-with-hidden-elements.2+Branch.feature-38788-load-viewpoints-with-hidden-elements.Sha.83f85e3da537b65795795947105374dc7b1b8af2";
+        public static DateTime BuildDateUtc { get; } = new DateTime(2021, 9, 7, 12, 13, 43, DateTimeKind.Utc);
     }
 }

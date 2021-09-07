@@ -74,9 +74,21 @@ namespace OpenProject.Revit.Entry
       var hasCamera = _bcfViewpoint.GetCamera().Match(
         camera =>
         {
-          Log.Information("Loading BCF Viewpoint ...");
+          Log.Information("Found camera type {t}, opening related OpenProject view ...", camera.Type.ToString());
+          View3D openProjectView = uiDocument.Document.GetOpenProjectView(camera.Type);
 
-          LoadBcfViewpoint(uiDocument, camera);
+          ResetView(uiDocument, openProjectView);
+          Log.Information("Reset view '{v}'.", openProjectView.Name);
+          ApplyViewOrientationAndVisibility(uiDocument, openProjectView, camera);
+          Log.Information("Applied view orientation and visibility in '{v}'.", openProjectView.Name);
+          ApplyClippingPlanes(uiDocument, openProjectView);
+          Log.Information("Applied view point clipping planes in '{v}'.", openProjectView.Name);
+
+          if (!uiDocument.ActiveView.Id.Equals(openProjectView.Id))
+          {
+            Log.Information("Setting view '{t}' as active view ...", openProjectView.Name);
+            uiDocument.ActiveView = openProjectView;
+          }
 
           uiDocument.RefreshActiveView();
           Log.Information("Refreshed active view.");
@@ -84,6 +96,7 @@ namespace OpenProject.Revit.Entry
 
           ZoomIfNeeded(app, camera, uiDocument.ActiveView.Id);
           Log.Information("Finished loading BCF viewpoint.");
+
           return true;
         },
         () => false);
@@ -109,10 +122,38 @@ namespace OpenProject.Revit.Entry
       AppIdlingCallbackListener.SetPendingZoomChangedCallback(app, viewId, orthoCam.ViewToWorldScale);
     }
 
-    private void LoadBcfViewpoint(UIDocument uiDocument, Camera camera)
+    private static void ResetView(UIDocument uiDocument, View view)
     {
-      Log.Information("Found camera type {t}, opening related OpenProject view ...", camera.Type.ToString());
-      View3D openProjectView = uiDocument.Document.GetOpenProjectView(camera.Type);
+      using var trans = new Transaction(uiDocument.Document);
+      if (trans.Start($"Reset view '{view.Name}'") != TransactionStatus.Started)
+        return;
+
+      Log.Information("Removing current selection ...");
+      uiDocument.Selection.SetElementIds(new List<ElementId>());
+
+      view.DisableTemporaryViewMode(TemporaryViewMode.TemporaryHideIsolate);
+
+      var currentlyHiddenElements = new FilteredElementCollector(uiDocument.Document)
+        .WhereElementIsNotElementType()
+        .WhereElementIsViewIndependent()
+        .Where(element => element.IsHidden(view))
+        .Select(element => element.Id)
+        .ToList();
+
+      if (currentlyHiddenElements.Any())
+      {
+        Log.Information("Unhide {n} currently hidden elements ...", currentlyHiddenElements.Count);
+        view.UnhideElements(currentlyHiddenElements);
+      }
+
+      trans.Commit();
+    }
+
+    private void ApplyViewOrientationAndVisibility(UIDocument uiDocument, View3D view, Camera camera)
+    {
+      using var trans = new Transaction(uiDocument.Document);
+      if (trans.Start($"Apply view orientation and visibility in '{view.Name}'") != TransactionStatus.Started)
+        return;
 
       StatusBarService.SetStatusText("Loading view point data ...");
       Log.Information("Calculating view orientation from camera position ...");
@@ -123,86 +164,73 @@ namespace OpenProject.Revit.Entry
           true)
         .ToViewOrientation3D();
 
-      Log.Information("Finding currently visible and hidden elements in view ...");
-      FilteredElementCollector viewElements = new FilteredElementCollector(uiDocument.Document, openProjectView.Id)
+      if (camera.Type == CameraType.Perspective)
+      {
+        Log.Information("Setting active far viewer bound to zero ...");
+        Parameter farClip = view.get_Parameter(BuiltInParameter.VIEWER_BOUND_ACTIVE_FAR);
+        if (farClip.HasValue) farClip.Set(0);
+      }
+
+      Log.Information("Applying new view orientation ...");
+      view.SetOrientation(viewOrientation3D);
+
+      Log.Information("Applying element visibility ...");
+      var currentlyVisibleElements = new FilteredElementCollector(uiDocument.Document, view.Id)
         .WhereElementIsNotElementType()
-        .WhereElementIsViewIndependent();
+        .WhereElementIsViewIndependent()
+        .Where(element => element.CanBeHidden(view))
+        .Select(element => element.Id)
+        .ToList();
 
-      var currentlyHiddenElements = new List<ElementId>();
-      var currentlyVisibleElements = new List<ElementId>();
-
-      foreach (Element element in viewElements)
-        if (element.IsHidden(openProjectView))
-          currentlyHiddenElements.Add(element.Id);
-        else if (element.CanBeHidden(openProjectView))
-          currentlyVisibleElements.Add(element.Id);
-
-      Log.Information("Retrieving visibility exceptions and selected elements " +
-                      "filtered by currently visible elements ...");
       var map = uiDocument.Document.GetIfcGuidElementIdMap(currentlyVisibleElements);
       var exceptionElements = GetViewpointVisibilityExceptions(map);
       var selectedElements = GetViewpointSelection(map);
+      if (exceptionElements.Any())
+        if (_bcfViewpoint.GetVisibilityDefault())
+        {
+          view.HideElementsTemporary(exceptionElements);
+          selectedElements = selectedElements.Where(id => !exceptionElements.Contains(id)).ToList();
+        }
+        else
+        {
+          view.IsolateElementsTemporary(exceptionElements);
+          selectedElements = selectedElements.Where(id => exceptionElements.Contains(id)).ToList();
+        }
+
+      view.ConvertTemporaryHideIsolateToPermanent();
+
+      if (selectedElements.Any())
+      {
+        Log.Information("Select {n} elements ...", selectedElements.Count);
+        uiDocument.Selection.SetElementIds(selectedElements);
+      }
+
+      trans.Commit();
+    }
+
+    private void ApplyClippingPlanes(UIDocument uiDocument, View3D view)
+    {
+      using var trans = new Transaction(uiDocument.Document);
+      if (trans.Start($"Apply view point clipping planes in '{view.Name}'") != TransactionStatus.Started)
+        return;
 
       Log.Information("Retrieving viewpoint clipping planes " +
                       "and converting them into an axis aligned bounding box ...");
       AxisAlignedBoundingBox boundingBox = GetViewpointClippingBox();
 
-      using var trans = new Transaction(uiDocument.Document);
-      Log.Information("Starting transaction to apply changes to view ...");
-      if (trans.Start("Apply BCF viewpoint to OpenProject view camera") == TransactionStatus.Started)
+      if (!boundingBox.Equals(AxisAlignedBoundingBox.Infinite))
       {
-        Log.Information("Removing current selection ...");
-        uiDocument.Selection.SetElementIds(new List<ElementId>());
-
-        if (camera.Type == CameraType.Perspective)
-        {
-          Log.Information("Setting active far viewer bound to zero ...");
-          Parameter farClip = openProjectView.get_Parameter(BuiltInParameter.VIEWER_BOUND_ACTIVE_FAR);
-          if (farClip.HasValue) farClip.Set(0);
-        }
-
-        if (currentlyHiddenElements.Any())
-        {
-          Log.Information("Unhide {n} currently hidden elements ...", currentlyHiddenElements.Count);
-          openProjectView.UnhideElements(currentlyHiddenElements);
-        }
-
-        Log.Information("Applying new view orientation ...");
-        openProjectView.SetOrientation(viewOrientation3D);
-
-        Log.Information("Applying element visibility ...");
-        if (exceptionElements.Any())
-          if (_bcfViewpoint.GetVisibilityDefault())
-            openProjectView.HideElementsTemporary(exceptionElements);
-          else
-            openProjectView.IsolateElementsTemporary(exceptionElements);
-
-        openProjectView.ConvertTemporaryHideIsolateToPermanent();
-
-        if (selectedElements.Any())
-        {
-          Log.Information("Select {n} elements ...", selectedElements.Count);
-          uiDocument.Selection.SetElementIds(selectedElements);
-        }
-
-        if (!boundingBox.Equals(AxisAlignedBoundingBox.Infinite))
-        {
-          Log.Information("Found axis aligned clipping planes. Setting resulting section box ...");
-          openProjectView.SetSectionBox(ToRevitSectionBox(boundingBox));
-          openProjectView.IsSectionBoxActive = true;
-        }
-        else
-        {
-          Log.Information("Found no axis aligned clipping planes. Disabling section box ...");
-          openProjectView.IsSectionBoxActive = false;
-        }
+        Log.Information("Found axis aligned clipping planes. Setting resulting section box ...");
+        view.SetSectionBox(ToRevitSectionBox(boundingBox));
+        view.IsSectionBoxActive = true;
+      }
+      else
+      {
+        Log.Information("Found no axis aligned clipping planes. Disabling section box ...");
+        view.IsSectionBoxActive = false;
       }
 
-      Log.Information("Committing BCF viewpoint transaction ...");
       trans.Commit();
-
-      Log.Information("Setting OpenProject view of type {t} as active view ...", camera.Type.ToString());
-      uiDocument.ActiveView = openProjectView;
     }
 
     private AxisAlignedBoundingBox GetViewpointClippingBox() => _bcfViewpoint.GetClippingPlanes()
