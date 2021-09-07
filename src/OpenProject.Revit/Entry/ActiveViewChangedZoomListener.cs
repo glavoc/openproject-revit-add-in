@@ -4,6 +4,7 @@ using Autodesk.Revit.UI.Events;
 using System;
 using System.Linq;
 using OpenProject.Revit.Data;
+using OpenProject.Revit.Services;
 using Serilog;
 
 namespace OpenProject.Revit.Entry
@@ -24,6 +25,7 @@ namespace OpenProject.Revit.Entry
     {
       void Callback(object sender, IdlingEventArgs args)
       {
+        StatusBarService.SetStatusText("Zooming to scale '" + zoom + "' ...");
         UIView currentView = app.ActiveUIDocument.GetOpenUIViews().First();
         if (currentView.ViewId != viewId) return;
 
@@ -48,6 +50,8 @@ namespace OpenProject.Revit.Entry
 
         Log.Information("Zoom to {topRight} | {bottomLeft} ...", newTopRight.ToString(), newBottomLeft.ToString());
         currentView.ZoomAndCenterRectangle(newTopRight, newBottomLeft);
+
+        StatusBarService.ResetStatusBarText();
         Log.Information("Finished applying zoom for orthogonal view.");
         app.Idling -= Callback;
       }

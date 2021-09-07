@@ -6,6 +6,7 @@ using OpenProject.Shared.ViewModels.Bcf;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using OpenProject.Revit.Services;
 using OpenProject.Shared.Math3D;
 using OpenProject.Shared.Math3D.Enumeration;
 using Serilog;
@@ -91,6 +92,7 @@ namespace OpenProject.Revit.Entry
 
           uiDocument.RefreshActiveView();
           Log.Information("Refreshed active view.");
+          StatusBarService.ResetStatusBarText();
 
           ZoomIfNeeded(app, camera, uiDocument.ActiveView.Id);
           Log.Information("Finished loading BCF viewpoint.");
@@ -116,6 +118,7 @@ namespace OpenProject.Revit.Entry
       if (camera.Type != CameraType.Orthogonal || camera is not OrthogonalCamera orthoCam) return;
 
       Log.Information("Found orthogonal camera, setting zoom callback ...");
+      StatusBarService.SetStatusText("Waiting for view to render to apply zoom ...");
       AppIdlingCallbackListener.SetPendingZoomChangedCallback(app, viewId, orthoCam.ViewToWorldScale);
     }
 
@@ -152,6 +155,7 @@ namespace OpenProject.Revit.Entry
       if (trans.Start($"Apply view orientation and visibility in '{view.Name}'") != TransactionStatus.Started)
         return;
 
+      StatusBarService.SetStatusText("Loading view point data ...");
       Log.Information("Calculating view orientation from camera position ...");
       ProjectPosition projectPosition = uiDocument.Document.ActiveProjectLocation.GetProjectPosition(XYZ.Zero);
       var viewOrientation3D = RevitUtils.TransformCameraPosition(
