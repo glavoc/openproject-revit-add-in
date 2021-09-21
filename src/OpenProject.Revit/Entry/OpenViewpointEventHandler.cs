@@ -122,7 +122,7 @@ namespace OpenProject.Revit.Entry
       AppIdlingCallbackListener.SetPendingZoomChangedCallback(app, viewId, orthoCam.ViewToWorldScale);
     }
 
-    private static void ResetView(UIDocument uiDocument, View view)
+    private static void ResetView(UIDocument uiDocument, View3D view)
     {
       using var trans = new Transaction(uiDocument.Document);
       if (trans.Start($"Reset view '{view.Name}'") != TransactionStatus.Started)
@@ -132,6 +132,8 @@ namespace OpenProject.Revit.Entry
       uiDocument.Selection.SetElementIds(new List<ElementId>());
 
       view.DisableTemporaryViewMode(TemporaryViewMode.TemporaryHideIsolate);
+      view.DisableTemporaryViewMode(TemporaryViewMode.RevealHiddenElements);
+      view.IsSectionBoxActive = false;
 
       var currentlyHiddenElements = new FilteredElementCollector(uiDocument.Document)
         .WhereElementIsNotElementType()
@@ -223,11 +225,6 @@ namespace OpenProject.Revit.Entry
         Log.Information("Found axis aligned clipping planes. Setting resulting section box ...");
         view.SetSectionBox(ToRevitSectionBox(boundingBox));
         view.IsSectionBoxActive = true;
-      }
-      else
-      {
-        Log.Information("Found no axis aligned clipping planes. Disabling section box ...");
-        view.IsSectionBoxActive = false;
       }
 
       trans.Commit();
