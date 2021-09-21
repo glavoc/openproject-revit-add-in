@@ -9,7 +9,7 @@ namespace OpenProject.Browser.ViewModels
   /// </summary>
   public sealed class MainWindowViewModel
   {
-    private const double _windowMinWidth = 730.00;
+    private const double _windowMinWidth = 800.00;
 
     /// <summary>
     /// The view of the nested bcfier panel.
