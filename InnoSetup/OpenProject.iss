@@ -1,7 +1,7 @@
 ;defining variables
 #define Repository     "..\."
 #define MyAppName      "OpenProject Revit AddIn"
-#define MyAppVersion GetFileVersion("..\output\OpenProject.Windows\OpenProject.Windows.exe")
+#define MyAppVersion GetFileVersion("..\output\OpenProject.Browser\OpenProject.Browser.exe")
 #define MyAppPublisher "OpenProject"
 #define MyAppURL       "http://www.openproject.org/"
 #define MyAppExeName   "OpenProject.Revit.exe"
@@ -14,8 +14,10 @@
 #define RevitAddin20  RevitAddinFolder+"\2020\"
 #define RevitFolder21 RevitAddinFolder+"\2021\"+RevitAppName
 #define RevitAddin21  RevitAddinFolder+"\2021\"
+#define RevitFolder22 RevitAddinFolder+"\2022\"+RevitAppName
+#define RevitAddin22  RevitAddinFolder+"\2022\"
 
-#define WinAppName    "OpenProject.Windows"
+#define WinAppName    "OpenProject.Browser"
 
 [Setup]
 AppId={{5f96a79f-0e28-4d02-be10-251c8032a270}
@@ -46,23 +48,29 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: revit19; Description: Addin for Autodesk Revit 2019;  Types: full
 Name: revit20; Description: Addin for Autodesk Revit 2020;  Types: full
 Name: revit21; Description: Addin for Autodesk Revit 2021;  Types: full
+Name: revit22; Description: Addin for Autodesk Revit 2022;  Types: full
 
 [Files]
 
 ;REVIT 2019                                                                                                                                    
 Source: "{#Repository}\output\{#RevitAppName}\Release-2019\*"; DestDir: "{#RevitFolder19}"; Flags: ignoreversion recursesubdirs; Components: revit19 
 Source: "{#Repository}\output\{#RevitAppName}\Release-2019\*.addin"; DestDir: "{#RevitAddin19}"; Flags: ignoreversion; Components: revit19
-Source: "{#Repository}\output\OpenProject.Windows\*"; DestDir: "{#RevitFolder19}\OpenProject.Windows\"; Flags: ignoreversion recursesubdirs; Components: revit19 
+Source: "{#Repository}\output\OpenProject.Browser\*"; DestDir: "{#RevitFolder19}\OpenProject.Browser\"; Flags: ignoreversion recursesubdirs; Components: revit19 
 
 ;REVIT 2020                                                                                                                                    
 Source: "{#Repository}\output\{#RevitAppName}\Release-2020\*"; DestDir: "{#RevitFolder20}"; Flags: ignoreversion recursesubdirs; Components: revit20 
 Source: "{#Repository}\output\{#RevitAppName}\Release-2020\*.addin"; DestDir: "{#RevitAddin20}"; Flags: ignoreversion; Components: revit20
-Source: "{#Repository}\output\OpenProject.Windows\*"; DestDir: "{#RevitFolder20}\OpenProject.Windows\"; Flags: ignoreversion recursesubdirs; Components: revit20 
+Source: "{#Repository}\output\OpenProject.Browser\*"; DestDir: "{#RevitFolder20}\OpenProject.Browser\"; Flags: ignoreversion recursesubdirs; Components: revit20 
 
 ;REVIT 2021                                                                                                                                    
 Source: "{#Repository}\output\{#RevitAppName}\Release-2021\*"; DestDir: "{#RevitFolder21}"; Flags: ignoreversion recursesubdirs; Components: revit21 
 Source: "{#Repository}\output\{#RevitAppName}\Release-2021\*.addin"; DestDir: "{#RevitAddin21}"; Flags: ignoreversion; Components: revit21
-Source: "{#Repository}\output\OpenProject.Windows\*"; DestDir: "{#RevitFolder21}\OpenProject.Windows\"; Flags: ignoreversion recursesubdirs; Components: revit21 
+Source: "{#Repository}\output\OpenProject.Browser\*"; DestDir: "{#RevitFolder21}\OpenProject.Browser\"; Flags: ignoreversion recursesubdirs; Components: revit21
+ 
+;REVIT 2022                                                                                                                                    
+Source: "{#Repository}\output\{#RevitAppName}\Release-2022\*"; DestDir: "{#RevitFolder22}"; Flags: ignoreversion recursesubdirs; Components: revit22 
+Source: "{#Repository}\output\{#RevitAppName}\Release-2022\*.addin"; DestDir: "{#RevitAddin22}"; Flags: ignoreversion; Components: revit22
+Source: "{#Repository}\output\OpenProject.Browser\*"; DestDir: "{#RevitFolder22}\OpenProject.Browser\"; Flags: ignoreversion recursesubdirs; Components: revit22 
 
 [Icons]
 Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"

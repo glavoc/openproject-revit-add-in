@@ -2,6 +2,7 @@
 using System;
 using System.IO;
 using System.Reflection;
+using OpenProject.Shared;
 
 namespace OpenProject.Revit.Entry
 {
@@ -19,8 +20,8 @@ namespace OpenProject.Revit.Entry
 
     public static string GetBcfierWinExecutablePath()
     {
-      var bcfierWinExecutablePath =  Settings.OpenProjectWindowsExecutablePath;
-      if (!System.IO.Path.IsPathRooted(bcfierWinExecutablePath))
+      var bcfierWinExecutablePath = Settings.OpenProjectWindowsExecutablePath;
+      if (!Path.IsPathRooted(bcfierWinExecutablePath))
       {
         var currentFolder = GetCurrentDllDirectory();
         bcfierWinExecutablePath = Path.Combine(currentFolder, bcfierWinExecutablePath);
@@ -28,7 +29,8 @@ namespace OpenProject.Revit.Entry
 
       if (!File.Exists(bcfierWinExecutablePath))
       {
-        throw new Exception($"The OpenProject.Windows.exe path in the configuration is given as: \"{bcfierWinExecutablePath}\", but the file could not be found.");
+        throw new Exception(
+          $"The OpenProject.Browser.exe path in the configuration is given as: \"{bcfierWinExecutablePath}\", but the file could not be found.");
       }
 
       return bcfierWinExecutablePath;
@@ -37,27 +39,20 @@ namespace OpenProject.Revit.Entry
     private static string GetConfigurationFilePath()
     {
       var configPath = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-        "OpenProject.Revit",
+        ConfigurationConstant.OpenProjectApplicationData,
         "OpenProject.Revit.Configuration.json");
 
-      if (!File.Exists(configPath))
-      {
-        // If the file doesn't yet exist, the default one is created
-        using (var configStream = typeof(ConfigurationLoader).Assembly.GetManifestResourceStream("OpenProject.Revit.OpenProject.Revit.Configuration.json"))
-        {
-          var configDirName = Path.GetDirectoryName(configPath);
-          if (!Directory.Exists(configDirName))
-          {
-            Directory.CreateDirectory(configDirName);
-          }
+      if (File.Exists(configPath)) return configPath;
 
-          using (var fs = File.Create(configPath))
-          {
-            configStream.CopyTo(fs);
-          }
-        }
-      }
+      // If the file doesn't yet exist, the default one is created
+      using Stream configStream =
+        typeof(ConfigurationLoader).Assembly.GetManifestResourceStream(
+          "OpenProject.Revit.OpenProject.Revit.Configuration.json");
+      var configDirName = Path.GetDirectoryName(configPath);
+      if (!Directory.Exists(configDirName)) Directory.CreateDirectory(configDirName);
+
+      using FileStream fs = File.Create(configPath);
+      configStream.CopyTo(fs);
 
       return configPath;
     }
