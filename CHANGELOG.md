@@ -3,7 +3,7 @@
 This is the Changelog for the OpenProject Revit Add-in. It follows the guidelines described
 in https://keepachangelog.com/en/1.0.0/. The versions follow [semantic versioning](https://semver.org/).
 
-## [Unreleased]
+## [2.3.0] - 2021-09-21
 
 ### Added
 
