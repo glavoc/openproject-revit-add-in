@@ -2,6 +2,10 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection;
+using OpenProject.Revit.Services;
+using OpenProject.Shared;
+using Serilog;
 using ZetaIpc.Runtime.Helper;
 
 namespace OpenProject.Revit.Entry
@@ -18,8 +22,8 @@ namespace OpenProject.Revit.Entry
     public const string RevitVersion = "2019";
 #endif
 
-    private static Process _bcfierWinProcess;
-    public static BcfierIpcHandler IpcHandler { get; private set; }
+    private static Process _opBrowserProcess;
+    public static IpcHandler IpcHandler { get; private set; }
 
     public static Result OpenMainPluginWindow(ExternalCommandData commandData, ref string message)
     {
@@ -58,38 +62,40 @@ namespace OpenProject.Revit.Entry
       //Version check
       if (!commandData.Application.Application.VersionName.Contains(RevitVersion))
       {
-        using var td = new TaskDialog("Untested version")
-        {
-          TitleAutoPrefix = false,
-          MainInstruction = "Untested Revit Version",
-          MainContent = "This Add-In was built and tested only for Revit " + RevitVersion +
-                        ", proceed at your own risk"
-        };
-        td.Show();
+        MessageHandler.ShowWarning(
+          "Unexpected version",
+          "The Revit version does not match the expectations.",
+          $"This Add-In was built and tested only for Revit {RevitVersion}. Further usage is at your own risk");
       }
 
-      // Form Running?
-      if (_bcfierWinProcess != null && !_bcfierWinProcess.HasExited)
+      if (_opBrowserProcess is { HasExited: false })
+        return;
+
+      IpcHandler = new IpcHandler(commandData.Application);
+      var revitServerPort = IpcHandler.StartLocalServerAndReturnPort();
+
+      var openProjectBrowserExecutablePath = GetOpenProjectBrowserExecutable();
+      if (!File.Exists(openProjectBrowserExecutablePath))
       {
+        MessageHandler.ShowError(null, "Browser executable not found.");
         return;
       }
 
-      IpcHandler = new BcfierIpcHandler(commandData.Application);
-      var revitServerPort = IpcHandler.StartLocalServerAndReturnPort();
-      var bcfierWinProcessPath = ConfigurationLoader.GetBcfierWinExecutablePath();
-      if (!File.Exists(bcfierWinProcessPath))
-      {
-        // The configuration can be used to override the path, if there's no valid file given then
-        // the default installation location is used
-        var defaultInstallationPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
-          "OpenProject Revit AddIn", "OpenProject.Browser.exe");
-        bcfierWinProcessPath = defaultInstallationPath;
-      }
+      var opBrowserServerPort = FreePortHelper.GetFreePort();
+      var processArguments = $"ipc {opBrowserServerPort} {revitServerPort}";
+      _opBrowserProcess = Process.Start(openProjectBrowserExecutablePath, processArguments);
+      IpcHandler.StartLocalClient(opBrowserServerPort);
+      Log.Information("IPC bridge started between port {port1} and {port2}.",
+        opBrowserServerPort, revitServerPort);
+    }
 
-      var bcfierWinServerPort = FreePortHelper.GetFreePort();
-      var bcfWinProcessArguments = $"ipc {bcfierWinServerPort} {revitServerPort}";
-      _bcfierWinProcess = Process.Start(bcfierWinProcessPath, bcfWinProcessArguments);
-      IpcHandler.StartLocalClient(bcfierWinServerPort);
+    private static string GetOpenProjectBrowserExecutable()
+    {
+      var currentAssemblyPathUri = Assembly.GetExecutingAssembly().CodeBase;
+      var currentAssemblyPath = Uri.UnescapeDataString(new Uri(currentAssemblyPathUri).AbsolutePath).Replace("/", "\\");
+      var currentFolder = Path.GetDirectoryName(currentAssemblyPath) ?? string.Empty;
+
+      return Path.Combine(currentFolder, ConfigurationConstant.OpenProjectBrowserExecutablePath);
     }
   }
 }

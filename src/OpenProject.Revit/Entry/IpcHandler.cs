@@ -17,14 +17,14 @@ using ZetaIpc.Runtime.Helper;
 
 namespace OpenProject.Revit.Entry
 {
-  public class BcfierIpcHandler
+  public class IpcHandler
   {
     private readonly UIApplication _uiApp;
     private Action<string> _sendData;
     private static readonly object _callbackStackLock = new();
     private static readonly Stack<Action> _callbackStack = new();
 
-    public BcfierIpcHandler(UIApplication uiApp)
+    public IpcHandler(UIApplication uiApp)
     {
       _uiApp = uiApp ?? throw new ArgumentNullException(nameof(uiApp));
 
@@ -34,8 +34,7 @@ namespace OpenProject.Revit.Entry
         {
           if (!_callbackStack.Any()) return;
 
-          var action = _callbackStack.Pop();
-          action.Invoke();
+          _callbackStack.Pop().Invoke();
         }
       };
     }
