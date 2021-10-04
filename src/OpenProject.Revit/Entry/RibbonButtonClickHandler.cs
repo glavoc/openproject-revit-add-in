@@ -34,9 +34,10 @@ namespace OpenProject.Revit.Entry
 
         return Result.Succeeded;
       }
-      catch (Exception e)
+      catch (Exception exception)
       {
-        message = e.Message;
+        message = exception.Message;
+        Log.Error(exception, message);
         return Result.Failed;
       }
     }
@@ -50,9 +51,10 @@ namespace OpenProject.Revit.Entry
         IpcHandler.SendBringBrowserToForegroundRequestToDesktopApp();
         return Result.Succeeded;
       }
-      catch (Exception e)
+      catch (Exception exception)
       {
-        message = e.Message;
+        message = exception.Message;
+        Log.Error(exception, message);
         return Result.Failed;
       }
     }
@@ -76,10 +78,7 @@ namespace OpenProject.Revit.Entry
 
       var openProjectBrowserExecutablePath = GetOpenProjectBrowserExecutable();
       if (!File.Exists(openProjectBrowserExecutablePath))
-      {
-        MessageHandler.ShowError(null, "Browser executable not found.");
-        return;
-      }
+        throw new SystemException("Browser executable not found.");
 
       var opBrowserServerPort = FreePortHelper.GetFreePort();
       var processArguments = $"ipc {opBrowserServerPort} {revitServerPort}";
