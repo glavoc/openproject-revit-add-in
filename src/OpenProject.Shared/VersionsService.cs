@@ -5,11 +5,11 @@ namespace OpenProject.Shared
     [System.CodeDom.Compiler.GeneratedCode("GitVersionBuild", "")]
     public static class VersionsService
     {
-        public static string Version => "2.2.5-38788-load-viewp0002";
-        public static string CommitInfo => "Branch.feature-38788-load-viewpoints-with-hidden-elements.Sha.83f85e3da537b65795795947105374dc7b1b8af2";
-        public static string CommitDate => "2021-09-03";
-        public static string CommitHash => "83f85e3da537b65795795947105374dc7b1b8af2";
-        public static string InformationalVersion => "2.2.5-38788-load-viewpoints-with-hidden-elements.2+Branch.feature-38788-load-viewpoints-with-hidden-elements.Sha.83f85e3da537b65795795947105374dc7b1b8af2";
-        public static DateTime BuildDateUtc { get; } = new DateTime(2021, 9, 7, 12, 13, 43, DateTimeKind.Utc);
+        public static string Version => "2.3.1-beta0001";
+        public static string CommitInfo => "Branch.dev.Sha.25c297551e0ff3a048396401e89b6fdf8abe9d0c";
+        public static string CommitDate => "2021-09-22";
+        public static string CommitHash => "25c297551e0ff3a048396401e89b6fdf8abe9d0c";
+        public static string InformationalVersion => "2.3.1-beta.1+Branch.dev.Sha.25c297551e0ff3a048396401e89b6fdf8abe9d0c";
+        public static DateTime BuildDateUtc { get; } = new DateTime(2021, 9, 30, 13, 53, 42, DateTimeKind.Utc);
     }
 }

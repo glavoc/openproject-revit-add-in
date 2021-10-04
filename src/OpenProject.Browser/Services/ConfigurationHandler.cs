@@ -1,11 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Windows;
 using Config.Net;
+using Newtonsoft.Json;
 using OpenProject.Browser.Settings;
-using Serilog;
 
 namespace OpenProject.Browser.Services
 {
@@ -27,53 +25,38 @@ namespace OpenProject.Browser.Services
       }
     }
 
-    public static IOpenProjectSettings Settings { get; }
+    private static IOpenProjectSettings Settings { get; }
 
     public static bool ShouldEnableDevelopmentTools() => Settings.EnableDevelopmentTools;
 
+    public static List<string> LoadAllInstances() => Settings.GetOpenProjectInstances();
+
     public static void RemoveSavedInstance(string instanceUrl)
     {
-      if (Settings.OpenProjectInstances == null || !Settings.OpenProjectInstances.Any()) return;
-
-      var existingValues = Settings.GetOpenProjectInstances();
-      var existing = existingValues.FirstOrDefault(e => e.ToString() == instanceUrl);
-      if (existing == null) return;
-
-      existingValues.Remove(existing);
-      Settings.SetOpenProjectInstances(existingValues);
+      var instances = Settings.GetOpenProjectInstances();
+      instances.Remove(instanceUrl);
+      Settings.OpenProjectInstances = JsonConvert.SerializeObject(instances);
     }
-
-    public static List<string> LoadAllInstances() => Settings.GetOpenProjectInstances().ToList();
-
-    public static void SaveLastVisitedPage(string url)
-    {
-      Settings.LastVisitedPage = url;
-    }
-
-    public static string LastVisitedPage() => Settings.LastVisitedPage ?? string.Empty;
 
     public static void SaveSelectedInstance(string instanceUrl)
     {
-      var existingValues = Settings.GetOpenProjectInstances();
-      if (existingValues == null)
-      {
-        Settings.SetOpenProjectInstances(new List<string>
-        {
-          instanceUrl
-        });
-      }
-      else
-      {
-        var existing = existingValues.FirstOrDefault(e => e.ToString() == instanceUrl);
-        if (existing != null)
-        {
-          existingValues.Remove(existing);
-        }
-
-        existingValues.Insert(0, instanceUrl);
-        Settings.SetOpenProjectInstances(existingValues);
-      }
+      RemoveSavedInstance(instanceUrl);
+      AddOpenProjectInstance(instanceUrl);
     }
+
+    private static void AddOpenProjectInstance(string openProjectInstance)
+    {
+      if (openProjectInstance == null || string.Empty.Equals(openProjectInstance))
+        return;
+
+      var instances = Settings.GetOpenProjectInstances();
+      instances.Insert(0, openProjectInstance);
+      Settings.OpenProjectInstances = JsonConvert.SerializeObject(instances);
+    }
+
+    public static void SaveLastVisitedPage(string url) => Settings.LastVisitedPage = url;
+
+    public static string LastVisitedPage() => Settings.LastVisitedPage ?? string.Empty;
 
     private static string GetConfigurationFilePath()
     {
@@ -85,8 +68,9 @@ namespace OpenProject.Browser.Services
       if (File.Exists(configPath)) return configPath;
 
       // If the file doesn't yet exist, the default one is created
-      using Stream configStream = typeof(ConfigurationHandler).Assembly
-        .GetManifestResourceStream("OpenProject.OpenProject.Configuration.json");
+      using Stream configStream =
+        typeof(ConfigurationHandler).Assembly
+          .GetManifestResourceStream("OpenProject.Browser.Settings.OpenProject.Configuration.json");
       if (configStream == null)
         throw new ApplicationException("Missing configuration manifest");
 

@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Newtonsoft.Json;
+using Serilog;
 
 namespace OpenProject.Browser.Settings
 {
@@ -7,24 +9,18 @@ namespace OpenProject.Browser.Settings
   {
     public static List<string> GetOpenProjectInstances(this IOpenProjectSettings settings)
     {
-      if (settings.OpenProjectInstances == null)
+      var result = new List<string>();
+
+      try
       {
-        return null;
+        result = JsonConvert.DeserializeObject<List<string>>(settings.OpenProjectInstances);
+      }
+      catch (Exception exception)
+      {
+        Log.Error(exception, "Invalid settings value for OpenProject instances: {0}.", settings.OpenProjectInstances);
       }
 
-      return JsonConvert.DeserializeObject<List<string>>(settings.OpenProjectInstances);
-    }
-
-    public static void SetOpenProjectInstances(this IOpenProjectSettings settings, List<string> openProjectInstances)
-    {
-      if (openProjectInstances == null)
-      {
-        settings.OpenProjectInstances = null;
-      }
-      else
-      {
-        settings.OpenProjectInstances = JsonConvert.SerializeObject(openProjectInstances);
-      }
+      return result;
     }
   }
 }
