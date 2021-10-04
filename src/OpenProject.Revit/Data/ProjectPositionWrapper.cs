@@ -1,5 +1,4 @@
-﻿using System;
-using Autodesk.Revit.DB;
+﻿using Autodesk.Revit.DB;
 using OpenProject.Shared.Math3D;
 
 namespace OpenProject.Revit.Data
@@ -47,10 +46,10 @@ namespace OpenProject.Revit.Data
 
     public ProjectPositionWrapper(ProjectPosition projectPosition)
     {
-      EastWest = Convert.ToDecimal(projectPosition.EastWest);
-      NorthSouth = Convert.ToDecimal(projectPosition.NorthSouth);
-      Elevation = Convert.ToDecimal(projectPosition.Elevation);
-      Angle = Convert.ToDecimal(projectPosition.Angle);
+      EastWest = projectPosition.EastWest.ToDecimal();
+      NorthSouth = projectPosition.NorthSouth.ToDecimal();
+      Elevation = projectPosition.Elevation.ToDecimal();
+      Angle = projectPosition.Angle.ToDecimal();
     }
 
     /// <summary>

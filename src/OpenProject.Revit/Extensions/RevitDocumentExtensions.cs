@@ -2,16 +2,18 @@
 using System.Collections.Generic;
 using System.Linq;
 using Autodesk.Revit.DB;
+using iabi.BCF.APIObjects.V21;
 using OpenProject.Shared;
+using OpenProject.Shared.BcfApi;
 using OpenProject.Shared.Math3D.Enumeration;
 using Serilog;
 
 namespace OpenProject.Revit.Extensions
 {
   /// <summary>
-  /// Extension written for handling of classes of the Revit API.
+  /// Extensions written for handling of classes of the Revit API.
   /// </summary>
-  public static class RevitExtensions
+  public static class RevitDocumentExtensions
   {
     private const string _openProjectOrthogonalViewName = "OpenProject Orthogonal";
     private const string _openProjectPerspectiveViewName = "OpenProject Perspective";
@@ -36,13 +38,55 @@ namespace OpenProject.Revit.Extensions
     }
 
     /// <summary>
+    /// Gets all visible elements in the given view of the document.
+    /// </summary>
+    /// <param name="doc">The Revit document</param>
+    /// <param name="view">The Revit view</param>
+    /// <returns>A list of element ids of all elements, that are currently visible.</returns>
+    public static IEnumerable<ElementId> GetVisibleElementsOfView(this Document doc, View view) =>
+      new FilteredElementCollector(doc, view.Id)
+        .WhereElementIsNotElementType()
+        .WhereElementIsViewIndependent()
+        .Where(element => element.CanBeHidden(view))
+        .Select(element => element.Id);
+
+    /// <summary>
+    /// Gets all invisible elements in the given view of the document.
+    /// </summary>
+    /// <param name="doc">The Revit document</param>
+    /// <param name="view">The Revit view</param>
+    /// <returns>A list of element ids of all elements, that are currently hidden.</returns>
+    public static IEnumerable<ElementId> GetHiddenElementsOfView(this Document doc, View view) =>
+      new FilteredElementCollector(doc)
+        .WhereElementIsNotElementType()
+        .WhereElementIsViewIndependent()
+        .Where(element => element.IsHidden(view))
+        .Select(element => element.Id);
+
+    /// <summary>
+    /// Gets a selector, that converts Revit element ids into BCF API components.
+    /// This is done in the context of a specific Revit Document.
+    /// </summary>
+    /// <param name="doc">The Revit document</param>
+    /// <returns>A selector converting <see cref="Autodesk.Revit.DB.ElementId"/> to <see cref="Component"/>.</returns>
+    public static Func<ElementId, Component> ElementIdToComponentSelector(this Document doc)
+    {
+      return id => new Component
+      {
+        Originating_system = doc.Application.VersionName,
+        Ifc_guid = IfcGuid.ToIfcGuid(ExportUtils.GetExportId(doc, id)),
+        Authoring_tool_id = id.ToString()
+      };
+    }
+
+    /// <summary>
     /// Gets the correct 3D view for displaying OpenProject content. The type of the view is dependent of the requested
     /// camera type, either orthogonal or perspective. If the view is not yet available, it is created.
     /// </summary>
     /// <param name="doc">The current revit document.</param>
     /// <param name="type">The camera type for the requested view.</param>
     /// <returns>A <see cref="View3D"/> with the correct settings to display OpenProject content.</returns>
-    /// <exception cref="ArgumentOutOfRangeException"> Throws, if camera type is neither orthogonal nor perspective.</exception>
+    /// <exception cref="System.ArgumentOutOfRangeException"> Throws, if camera type is neither orthogonal nor perspective.</exception>
     public static View3D GetOpenProjectView(this Document doc, CameraType type)
     {
       var viewName = type switch
@@ -99,6 +143,11 @@ namespace OpenProject.Revit.Extensions
       return from elem in new FilteredElementCollector(doc).OfClass(typeof(View3D))
         let view = elem as View3D
         select view;
+    }
+
+    public static BcfViewpointViewModel GetBcfViewpoint(this Document doc)
+    {
+      throw new NotImplementedException();
     }
   }
 }

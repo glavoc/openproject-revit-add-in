@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using iabi.BCF.APIObjects.V21;
+using OpenProject.Shared.BcfApi;
 using OpenProject.Shared.Math3D;
-using OpenProject.Shared.ViewModels.Bcf;
 using Xunit;
 
 namespace OpenProject.Tests.ViewModels.Bcf

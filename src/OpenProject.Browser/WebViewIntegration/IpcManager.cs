@@ -13,14 +13,14 @@ namespace OpenProject.Browser.WebViewIntegration
       server.Start(serverPort);
       server.ReceivedRequest += (sender, e) =>
       {
-        var deserialized = JsonConvert.DeserializeObject<WebUIMessageEventArgs>(e.Request);
+        var deserialized = JsonConvert.DeserializeObject<WebUiMessageEventArgs>(e.Request);
         javaScriptBridge.SendMessageToOpenProject(
           deserialized.MessageType, deserialized.TrackingId, deserialized.MessagePayload);
       };
 
       var client = new IpcClient();
       client.Initialize(clientPort);
-      javaScriptBridge.OnWebUIMessageReveived += (s, e) => client.Send(JsonConvert.SerializeObject(e));
+      javaScriptBridge.OnWebUiMessageReceived += (s, e) => client.Send(JsonConvert.SerializeObject(e));
     }
   }
 }

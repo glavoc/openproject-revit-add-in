@@ -1,7 +1,6 @@
 ﻿using System;
 using Autodesk.Revit.DB;
 using OpenProject.Shared.Math3D;
-
 using decMath = DecimalMath.DecimalEx;
 
 namespace OpenProject.Revit.Data
@@ -26,7 +25,7 @@ namespace OpenProject.Revit.Data
       var i = reverse ? -1 : 1;
 
       Vector3 translation = projectBase.GetTranslation() * i;
-      var rotation = i * Convert.ToDecimal(projectBase.Angle);
+      var rotation = i * projectBase.Angle;
 
       // do translation before rotation if we transform from global to local coordinates
       Vector3 center = reverse
@@ -83,10 +82,7 @@ namespace OpenProject.Revit.Data
     /// </summary>
     /// <param name="vec">The vector3 object</param>
     /// <returns>The Revit vector object</returns>
-    public static Vector3 ToVector3(this XYZ vec) =>
-      new(Convert.ToDecimal(vec.X),
-        Convert.ToDecimal(vec.Y),
-        Convert.ToDecimal(vec.Z));
+    public static Vector3 ToVector3(this XYZ vec) => new(vec.X.ToDecimal(), vec.Y.ToDecimal(), vec.Z.ToDecimal());
 
     /// <summary>
     /// Converts some basic revit view values to a view box height and a view box width.
@@ -96,7 +92,7 @@ namespace OpenProject.Revit.Data
     /// <param name="bottomLeft">The bottom left corner of the revit view.</param>
     /// <param name="right">The right direction of the revit view.</param>
     /// <returns>A tuple of the height and the width of the view box.</returns>
-    public static ( double viewBoxHeight, double viewBoxWidth) ConvertToViewBoxValues(
+    public static (double viewBoxHeight, double viewBoxWidth) ConvertToViewBoxValues(
       XYZ topRight, XYZ bottomLeft, XYZ right)
     {
       XYZ diagonal = topRight.Subtract(bottomLeft);
@@ -142,20 +138,28 @@ namespace OpenProject.Revit.Data
     /// </summary>
     /// <param name="vec">The vector with values in feet</param>
     /// <returns>The vector with values in meter</returns>
-    public static Vector3 ToMeters(this Vector3 vec) =>
-      new(Convert.ToDecimal(Convert.ToDouble(vec.X).ToMeters()),
-        Convert.ToDecimal(Convert.ToDouble(vec.Y).ToMeters()),
-        Convert.ToDecimal(Convert.ToDouble(vec.Z).ToMeters()));
+    public static Vector3 ToMeters(this Vector3 vec)
+    {
+      var x = vec.X.IsFinite() ? Convert.ToDouble(vec.X).ToMeters().ToDecimal() : vec.X;
+      var y = vec.Y.IsFinite() ? Convert.ToDouble(vec.Y).ToMeters().ToDecimal() : vec.Y;
+      var z = vec.Z.IsFinite() ? Convert.ToDouble(vec.Z).ToMeters().ToDecimal() : vec.Z;
+
+      return new Vector3(x, y, z);
+    }
 
     /// <summary>
     /// Converts a vector containing values in meter units to feet. Feet are the internal Revit units.
     /// </summary>
     /// <param name="vec">The vector with values in meter</param>
     /// <returns>The vector with values in feet</returns>
-    public static Vector3 ToInternalUnits(this Vector3 vec) =>
-      new(Convert.ToDecimal(Convert.ToDouble(vec.X).ToInternalRevitUnit()),
-        Convert.ToDecimal(Convert.ToDouble(vec.Y).ToInternalRevitUnit()),
-        Convert.ToDecimal(Convert.ToDouble(vec.Z).ToInternalRevitUnit()));
+    public static Vector3 ToInternalUnits(this Vector3 vec)
+    {
+      var x = vec.X.IsFinite() ? Convert.ToDouble(vec.X).ToInternalRevitUnit().ToDecimal() : vec.X;
+      var y = vec.Y.IsFinite() ? Convert.ToDouble(vec.Y).ToInternalRevitUnit().ToDecimal() : vec.Y;
+      var z = vec.Z.IsFinite() ? Convert.ToDouble(vec.Z).ToInternalRevitUnit().ToDecimal() : vec.Z;
+
+      return new Vector3(x, y, z);
+    }
 
     /// <summary>
     /// Converts a position containing values in feet units to meter. Feet are the internal Revit units.

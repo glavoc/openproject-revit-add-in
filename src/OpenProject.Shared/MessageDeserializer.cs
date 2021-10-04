@@ -1,29 +1,24 @@
 ﻿using iabi.BCF.APIObjects.V21;
 using Newtonsoft.Json.Linq;
-using OpenProject.Shared.ViewModels.Bcf;
 using System;
+using OpenProject.Shared.BcfApi;
 
 namespace OpenProject.Shared
 {
   public static class MessageDeserializer
   {
-    public static BcfViewpointViewModel DeserializeBcfViewpoint(WebUIMessageEventArgs webUIMessage)
+    public static BcfViewpointViewModel DeserializeBcfViewpoint(WebUiMessageEventArgs webUiMessage)
     {
-      if (webUIMessage.MessageType != MessageTypes.VIEWPOINT_DATA)
-      {
+      if (webUiMessage.MessageType != MessageTypes.VIEWPOINT_DATA)
         throw new InvalidOperationException("Tried to deserialize a message with the wrong data type");
-      }
 
-      var jObject = JObject.Parse(webUIMessage.MessagePayload.Trim('"').Replace("\\\"", "\""));
+      JObject jObject = JObject.Parse(webUiMessage.MessagePayload.Trim('"').Replace("\\\"", "\""));
 
-      var bcfViewpoint = new BcfViewpointViewModel
+      return new BcfViewpointViewModel
       {
         Viewpoint = jObject.ToObject<Viewpoint_GET>(),
-        SnapshotData = jObject["snapshot"]?["snapshot_data"]?.ToString(),
         Components = jObject["components"]?.ToObject<Components>()
       };
-
-      return bcfViewpoint;
     }
   }
 }
