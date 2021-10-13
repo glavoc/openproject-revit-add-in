@@ -8,7 +8,7 @@ namespace OpenProject.Shared.BcfApi
   /// <summary>
   /// A view model for BCF viewpoints.
   /// </summary>
-  public sealed class BcfViewpointViewModel
+  public sealed class BcfViewpointWrapper
   {
     public Viewpoint_GET Viewpoint { get; set; }
 

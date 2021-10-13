@@ -4,7 +4,6 @@ using System.Linq;
 using Autodesk.Revit.DB;
 using iabi.BCF.APIObjects.V21;
 using OpenProject.Shared;
-using OpenProject.Shared.BcfApi;
 using OpenProject.Shared.Math3D.Enumeration;
 using Serilog;
 
@@ -143,11 +142,6 @@ namespace OpenProject.Revit.Extensions
       return from elem in new FilteredElementCollector(doc).OfClass(typeof(View3D))
         let view = elem as View3D
         select view;
-    }
-
-    public static BcfViewpointViewModel GetBcfViewpoint(this Document doc)
-    {
-      throw new NotImplementedException();
     }
   }
 }

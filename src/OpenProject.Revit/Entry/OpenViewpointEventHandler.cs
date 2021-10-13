@@ -37,7 +37,7 @@ namespace OpenProject.Revit.Entry
     /// <inheritdoc />
     public string GetName() => nameof(OpenViewpointEventHandler);
 
-    private BcfViewpointViewModel _bcfViewpoint;
+    private BcfViewpointWrapper _bcfViewpoint;
 
     private static OpenViewpointEventHandler _instance;
 
@@ -65,7 +65,7 @@ namespace OpenProject.Revit.Entry
     /// http://matteocominetti.com/starting-a-transaction-from-an-external-application-running-outside-of-api-context-is-not-allowed/
     /// </remarks>
     /// <param name="bcfViewpoint">The bcf viewpoint to be shown in current view.</param>
-    public static void ShowBcfViewpoint(BcfViewpointViewModel bcfViewpoint)
+    public static void ShowBcfViewpoint(BcfViewpointWrapper bcfViewpoint)
     {
       Log.Information("Received 'Opening BCF Viewpoint event'. Attempting to open viewpoint ...");
       Instance._bcfViewpoint = bcfViewpoint;

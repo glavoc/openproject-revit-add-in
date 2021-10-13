@@ -7,14 +7,14 @@ namespace OpenProject.Shared
 {
   public static class MessageDeserializer
   {
-    public static BcfViewpointViewModel DeserializeBcfViewpoint(WebUiMessageEventArgs webUiMessage)
+    public static BcfViewpointWrapper DeserializeBcfViewpoint(WebUiMessageEventArgs webUiMessage)
     {
       if (webUiMessage.MessageType != MessageTypes.VIEWPOINT_DATA)
         throw new InvalidOperationException("Tried to deserialize a message with the wrong data type");
 
       JObject jObject = JObject.Parse(webUiMessage.MessagePayload.Trim('"').Replace("\\\"", "\""));
 
-      return new BcfViewpointViewModel
+      return new BcfViewpointWrapper
       {
         Viewpoint = jObject.ToObject<Viewpoint_GET>(),
         Components = jObject["components"]?.ToObject<Components>()

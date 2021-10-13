@@ -64,7 +64,7 @@ namespace OpenProject.Revit.Entry
               {
                 try
                 {
-                  BcfViewpointViewModel bcfViewpoint = MessageDeserializer.DeserializeBcfViewpoint(
+                  BcfViewpointWrapper bcfViewpoint = MessageDeserializer.DeserializeBcfViewpoint(
                     new WebUiMessageEventArgs(localMessageType, localTrackingId, localMessagePayload));
                   OpenViewpointEventHandler.ShowBcfViewpoint(bcfViewpoint);
                 }
