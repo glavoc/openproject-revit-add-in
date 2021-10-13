@@ -17,6 +17,15 @@ in https://keepachangelog.com/en/1.0.0/. The versions follow [semantic versionin
 - Section boxes with infinity values, which can exist after importing viewpoints with less then 6 clipping planes, no
   longer create invalid viewpoint data when generating a new viewpoint.
 
+## [2.3.1] - 2021-10-04
+
+### Fixed
+
+- Fixed an issue that led to an exception when installing the Revit Add-In for the very first time
+- Made the loading of the `OpenProject.Configuration.json` more robust, so that missing or outdated keys no longer lead
+  to errors
+- Improved logging and error dialog communication
+
 ## [2.3.0] - 2021-09-21
 
 ### Added
