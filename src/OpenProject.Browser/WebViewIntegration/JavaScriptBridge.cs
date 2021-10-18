@@ -32,9 +32,9 @@ namespace OpenProject.Browser.WebViewIntegration
 
     private ChromiumWebBrowser _webBrowser;
 
-    public event WebUIMessageReceivedEventHandler OnWebUIMessageReveived;
+    public event WebUiMessageReceivedEventHandler OnWebUiMessageReceived;
 
-    public delegate void WebUIMessageReceivedEventHandler(object sender, WebUIMessageEventArgs e);
+    public delegate void WebUiMessageReceivedEventHandler(object sender, WebUiMessageEventArgs e);
 
     public event AppForegroundRequestReceivedEventHandler OnAppForegroundRequestReceived;
 
@@ -101,8 +101,8 @@ namespace OpenProject.Browser.WebViewIntegration
           break;
         default:
         {
-          var eventArgs = new WebUIMessageEventArgs(messageType, trackingId, messagePayload);
-          OnWebUIMessageReveived?.Invoke(this, eventArgs);
+          var eventArgs = new WebUiMessageEventArgs(messageType, trackingId, messagePayload);
+          OnWebUiMessageReceived?.Invoke(this, eventArgs);
           // For some UI operations, revit should be focused
           RevitMainWindowHandler.SetFocusToRevit();
           break;

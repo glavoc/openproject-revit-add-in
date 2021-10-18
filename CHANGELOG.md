@@ -3,6 +3,20 @@
 This is the Changelog for the OpenProject Revit Add-in. It follows the guidelines described
 in https://keepachangelog.com/en/1.0.0/. The versions follow [semantic versioning](https://semver.org/).
 
+## Unreleased
+
+### Changed
+
+- Viewpoint snapshot data is given in an improper state to the OpenProject instance frontend. The current hack has to
+  be maintained until the related
+  [work package](https://community.openproject.org/projects/bcfier/work_packages/39135/activity) is resolved and the
+  solution deployed. 
+
+### Fixed
+
+- Section boxes with infinity values, which can exist after importing viewpoints with less then 6 clipping planes, no
+  longer create invalid viewpoint data when generating a new viewpoint.
+
 ## [2.3.1] - 2021-10-04
 
 ### Fixed

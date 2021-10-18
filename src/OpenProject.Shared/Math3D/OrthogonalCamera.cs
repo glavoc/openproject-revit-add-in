@@ -1,5 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using OpenProject.Shared.Math3D.Enumeration;
+﻿using OpenProject.Shared.Math3D.Enumeration;
 
 namespace OpenProject.Shared.Math3D
 {

@@ -1,19 +1,18 @@
 ﻿using System.Collections.Generic;
 using iabi.BCF.APIObjects.V21;
 using OpenProject.Shared.Math3D;
-using OpenProject.Shared.ViewModels.Bcf;
 using Xunit;
 
-namespace OpenProject.Tests.ViewModels.Bcf
+namespace OpenProject.Tests.Shared.BcfApi
 {
-  public class BcfViewpointViewModelTest
+  public class BcfViewpointWrapper
   {
     public static IEnumerable<object[]> GetCameraTestData()
     {
       // viewpoint with orthogonal camera
       yield return new object[]
       {
-        new BcfViewpointViewModel
+        new OpenProject.Shared.BcfApi.BcfViewpointWrapper
         {
           Viewpoint = new Viewpoint_GET
           {
@@ -39,7 +38,7 @@ namespace OpenProject.Tests.ViewModels.Bcf
       // viewpoint with perspective camera
       yield return new object[]
       {
-        new BcfViewpointViewModel
+        new OpenProject.Shared.BcfApi.BcfViewpointWrapper
         {
           Viewpoint = new Viewpoint_GET
           {
@@ -65,7 +64,7 @@ namespace OpenProject.Tests.ViewModels.Bcf
       // viewpoint without camera
       yield return new object[]
       {
-        new BcfViewpointViewModel
+        new OpenProject.Shared.BcfApi.BcfViewpointWrapper
           { Viewpoint = new Viewpoint_GET { Orthogonal_camera = null, Perspective_camera = null } },
         null
       };
@@ -73,7 +72,7 @@ namespace OpenProject.Tests.ViewModels.Bcf
 
     [Theory]
     [MemberData(nameof(GetCameraTestData))]
-    public void GetCamera_ReturnsExpectedCameraForGivenViewpoint(BcfViewpointViewModel bcfViewpoint, Camera camera)
+    public void GetCamera_ReturnsExpectedCameraForGivenViewpoint(OpenProject.Shared.BcfApi.BcfViewpointWrapper bcfViewpoint, Camera camera)
     {
       // Act / Assert
       bcfViewpoint.GetCamera().Match(

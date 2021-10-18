@@ -49,6 +49,14 @@ namespace OpenProject.Shared.Math3D
     }
 
     /// <summary>
+    /// Calculates the sum of this vector and the given one.
+    /// </summary>
+    /// <param name="v1">The left vector.</param>
+    /// <param name="v2">The right vector.</param>
+    /// <returns>The dot product value.</returns>
+    public static Vector3 operator +(Vector3 v1, Vector3 v2) => new Vector3(v1.X + v2.X, v1.Y + v2.Y, v1.Z + v2.Z);
+
+    /// <summary>
     /// Calculates the dot product of this vector and the given one.
     /// </summary>
     /// <param name="v1">The left vector.</param>
