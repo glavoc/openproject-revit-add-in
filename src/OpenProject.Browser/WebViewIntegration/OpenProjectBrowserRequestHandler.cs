@@ -4,6 +4,7 @@ using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using CefSharp;
 using OpenProject.Browser.Services;
+using OpenProject.Browser.Settings;
 
 namespace OpenProject.Browser.WebViewIntegration
 {
@@ -60,7 +61,7 @@ namespace OpenProject.Browser.WebViewIntegration
       if (isValidLocalUrl)
         return true;
 
-      var knownGoodUrls = ConfigurationHandler.LoadAllInstances();
+      var knownGoodUrls = ConfigurationHandler.Settings.GetOpenProjectInstances();
       var isValidExternalUrl = knownGoodUrls.Any(goodUrl =>
         request.Url.StartsWith(goodUrl, StringComparison.InvariantCultureIgnoreCase));
 

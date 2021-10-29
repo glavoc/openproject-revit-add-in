@@ -20,6 +20,7 @@ in https://keepachangelog.com/en/1.0.0/. The versions follow [semantic versionin
 
 - Section boxes with infinity values, which can exist after importing viewpoints with less then 6 clipping planes, no
   longer create invalid viewpoint data when generating a new viewpoint.
+- If there is a newer version of the AddIn released at GitHub, a notification dialog is displayed again
 
 ## [2.3.1] - 2021-10-04
 

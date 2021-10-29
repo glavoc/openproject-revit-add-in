@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using Config.Net;
 using Newtonsoft.Json;
@@ -25,11 +24,7 @@ namespace OpenProject.Browser.Services
       }
     }
 
-    private static IOpenProjectSettings Settings { get; }
-
-    public static bool ShouldEnableDevelopmentTools() => Settings.EnableDevelopmentTools;
-
-    public static List<string> LoadAllInstances() => Settings.GetOpenProjectInstances();
+    public static IOpenProjectSettings Settings { get; }
 
     public static void RemoveSavedInstance(string instanceUrl)
     {
