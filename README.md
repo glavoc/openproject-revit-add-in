@@ -18,13 +18,38 @@ direction.
 
 Please follow the [installation instructions](docs/installation-instructions.md).
 
-## Development
+## Reporting bugs
+
+You found a bug? Please [report it](https://docs.openproject.org/development/report-a-bug) to our [OpenProject community](https://community.openproject.com/projects/revit-add-in). Thank you!
+
+## Contribution and development
+
+OpenProject is supported by its community members, both companies and individuals.
+
+We are always looking for new members to our community, so if you are interested in improving the OpenProject Revit Add-in we would be glad to welcome and support you getting into the code. There are guides as well, e.g. a [Quick Start for Developers](https://www.openproject.org/development/setting-up-development-environment/), but don't hesitate to simply [contact us](https://www.openproject.org/contact-us) if you have questions.
+
+Working on OpenProject comes with the satisfaction of working on a widely used open source application.
+
+Also, if you do not want to be limited to working on open source in your free time, OpenProject GmbH, the company contributing to the OpenProject development, [is hiring](https://www.openproject.org/career/).
 
 ### Browser Developer Tools
 
 We can enable the **Developer Tools** for the `CefSharp` browser of the Windows application. The add-in creates on first
 run a default configuration file at `~\AppData\Roaming\OpenProject.Revit\OpenProject.Configuration.json`. To enable the
 developer tools, change the value of `EnableDevelopmentTools` to `true`.
+
+## Contact
+
+Here you can find our [contact information](https://www.openproject.org/contact-us).
+
+## Security / responsible disclosure
+
+We take security very seriously at OpenProject. We value any kind of feedback that
+will keep our community secure. If you happen to come across a security issue we urge
+you to disclose it to us privately to allow our users and community enough time to
+upgrade. Security issues will always take precedence over anything else in the pipeline.
+
+For more information on how to disclose a security vulnerability, [please see this page](docs/development/security/README.md).
 
 ## License
 
