@@ -5,6 +5,10 @@ in https://keepachangelog.com/en/1.0.0/. The versions follow [semantic versionin
 
 ## Unreleased
 
+### Added
+
+- Amended README with information about reporting bugs and other useful information
+
 ### Changed
 
 - Viewpoint snapshot data is given in an improper state to the OpenProject instance frontend. The current hack has to
