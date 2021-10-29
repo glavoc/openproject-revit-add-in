@@ -22,6 +22,7 @@ namespace OpenProject.Browser.Services
       }
     }
 
+    /// <inheritdoc />
     public Option<Release> GetLatestRelease()
     {
       var request =

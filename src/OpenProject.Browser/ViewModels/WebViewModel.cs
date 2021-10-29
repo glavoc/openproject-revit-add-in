@@ -43,6 +43,9 @@ namespace OpenProject.Browser.ViewModels
 
     private void CheckForUpdates()
     {
+      if (!ConfigurationHandler.Settings.CheckForUpdates)
+        return;
+
       var latestRelease = _gitHubService.GetLatestRelease();
 
       latestRelease.MatchSome(release =>
