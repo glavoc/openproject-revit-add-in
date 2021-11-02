@@ -23,7 +23,8 @@ namespace OpenProject.Revit.Extensions
     /// <param name="doc">A revit document</param>
     /// <param name="elements">A list of element ids</param>
     /// <returns>The map between IFC GUIDs and revit element ids.</returns>
-    public static Dictionary<string, ElementId> GetIfcGuidElementIdMap(this Document doc, IEnumerable<ElementId> elements)
+    public static Dictionary<string, ElementId> GetIfcGuidElementIdMap(this Document doc,
+      IEnumerable<ElementId> elements)
     {
       var map = new Dictionary<string, ElementId>();
       foreach (ElementId element in elements)
@@ -55,12 +56,19 @@ namespace OpenProject.Revit.Extensions
     /// <param name="doc">The Revit document</param>
     /// <param name="view">The Revit view</param>
     /// <returns>A list of element ids of all elements, that are currently hidden.</returns>
-    public static IEnumerable<ElementId> GetHiddenElementsOfView(this Document doc, View view) =>
-      new FilteredElementCollector(doc)
+    public static IEnumerable<ElementId> GetHiddenElementsOfView(this Document doc, View view)
+    {
+      bool ElementIsHiddenInView(Element element) =>
+        element.IsHidden(view) ||
+        element.Category is { CategoryType: CategoryType.Model } &&
+        view.GetCategoryHidden(element.Category.Id);
+
+      return new FilteredElementCollector(doc)
         .WhereElementIsNotElementType()
         .WhereElementIsViewIndependent()
-        .Where(element => element.IsHidden(view))
+        .Where(ElementIsHiddenInView)
         .Select(element => element.Id);
+    }
 
     /// <summary>
     /// Gets a selector, that converts Revit element ids into BCF API components.
