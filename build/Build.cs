@@ -286,7 +286,7 @@ namespace OpenProject.Shared
 
   static bool ShouldBuildRelease()
   {
-    const string flag = "skip-release";
+    const string flag = "[release skip]";
 
     var message = GitTasks.Git("log -1 --pretty=format:%B", logOutput: false)
       .Select(output => output.Text)
