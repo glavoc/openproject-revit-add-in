@@ -224,7 +224,7 @@ namespace OpenProject.Shared
        .Executes(() =>
         {
           DotNetTest(c => c
-            .SetConfiguration("Debug")
+            .SetConfiguration("Debug-2022")
             .SetProjectFile(RootDirectory / "test" / "OpenProject.Tests" / "OpenProject.Tests.csproj")
             .SetTestAdapterPath(".")
             .SetLoggers($"xunit;LogFilePath={OutputDirectory / "testresults.xml"}"));
