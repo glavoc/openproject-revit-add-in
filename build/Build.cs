@@ -12,10 +12,13 @@ using Nuke.Common.Tools.SignTool;
 using Nuke.Common.Utilities.Collections;
 using Nuke.GitHub;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using Nuke.Common.Tools.Git;
+using Octokit;
 using static Nuke.Common.IO.CompressionTasks;
 using static Nuke.Common.IO.FileSystemTasks;
 using static Nuke.Common.IO.PathConstruction;
@@ -221,7 +224,7 @@ namespace OpenProject.Shared
        .Executes(() =>
         {
           DotNetTest(c => c
-            .SetConfiguration("Debug")
+            .SetConfiguration("Debug-2022")
             .SetProjectFile(RootDirectory / "test" / "OpenProject.Tests" / "OpenProject.Tests.csproj")
             .SetTestAdapterPath(".")
             .SetLoggers($"xunit;LogFilePath={OutputDirectory / "testresults.xml"}"));
@@ -281,7 +284,19 @@ namespace OpenProject.Shared
         SignFilesIfRequirementsMet(OutputDirectory / "OpenProject.Revit.exe");
       });
 
+  static bool ShouldBuildRelease()
+  {
+    const string flag = "[release skip]";
+
+    var message = GitTasks.Git("log -1 --pretty=format:%B", logOutput: false)
+      .Select(output => output.Text)
+      .Aggregate((s, s1) => $"{s}\n{s1}");
+
+    return !message.Contains(flag);
+  }
+
   Target PublishGitHubRelease => _ => _
+      .OnlyWhenDynamic(() => ShouldBuildRelease())
       .DependsOn(CreateSetup)
       .DependsOn(BuildDocumentation)
       .Requires(() => GitHubAuthenticationToken)
@@ -290,10 +305,10 @@ namespace OpenProject.Shared
         var releaseTag = $"v{GitVersion.SemVer}";
         var isStableRelease = GitVersion.BranchName.Equals("master") || GitVersion.BranchName.Equals("origin/master") || GitVersion.BranchName.Equals("main") || GitVersion.BranchName.Equals("origin/main");
 
-        var repositoryInfo = GetGitHubRepositoryInfo(GitRepository);
+        var (gitHubOwner, repositoryName) = GetGitHubRepositoryInfo(GitRepository);
         var installationFile = GlobFiles(OutputDirectory, "OpenProject.Revit.exe").NotEmpty().Single();
 
-        var artifactPaths = new string[]
+        var artifactPaths = new[]
         {
           installationFile,
           OutputDirectory / "InstallationInstructions.pdf",
@@ -304,8 +319,8 @@ namespace OpenProject.Shared
               .SetPrerelease(!isStableRelease)
               .SetArtifactPaths(artifactPaths)
               .SetCommitSha(GitVersion.Sha)
-              .SetRepositoryName(repositoryInfo.repositoryName)
-              .SetRepositoryOwner(repositoryInfo.gitHubOwner)
+              .SetRepositoryName(repositoryName)
+              .SetRepositoryOwner(gitHubOwner)
               .SetTag(releaseTag)
               .SetToken(GitHubAuthenticationToken));
       });

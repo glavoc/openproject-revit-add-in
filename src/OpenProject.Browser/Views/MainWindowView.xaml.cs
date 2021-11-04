@@ -20,6 +20,7 @@ namespace OpenProject.Browser.Views
 
       // We have to set layout here, as the layout in wpf doesn't work with bindings at runtime.
       Width = viewModel.Width;
+      MinWidth = viewModel.MinWidth;
       Height = viewModel.Height;
       Top = viewModel.Top;
       Left = viewModel.Left;
