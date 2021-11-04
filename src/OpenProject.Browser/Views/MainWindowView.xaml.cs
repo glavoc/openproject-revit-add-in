@@ -18,8 +18,6 @@ namespace OpenProject.Browser.Views
     {
       DataContext = viewModel;
 
-      var primaryScreenHeight = SystemParameters.PrimaryScreenHeight;
-
       // We have to set layout here, as the layout in wpf doesn't work with bindings at runtime.
       Width = viewModel.Width;
       MinWidth = viewModel.MinWidth;
