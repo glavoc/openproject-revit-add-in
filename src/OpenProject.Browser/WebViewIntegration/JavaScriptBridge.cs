@@ -5,6 +5,7 @@ using CefSharp;
 using CefSharp.Wpf;
 using Newtonsoft.Json;
 using OpenProject.Browser.Services;
+using OpenProject.Browser.Settings;
 using OpenProject.Shared;
 using Serilog;
 
@@ -83,7 +84,7 @@ namespace OpenProject.Browser.WebViewIntegration
           break;
         case MessageTypes.ALL_INSTANCES_REQUESTED:
         {
-          var allInstances = JsonConvert.SerializeObject(ConfigurationHandler.LoadAllInstances());
+          var allInstances = JsonConvert.SerializeObject(ConfigurationHandler.Settings.GetOpenProjectInstances());
           SendMessageToOpenProject(MessageTypes.ALL_INSTANCES, trackingId, allInstances);
           break;
         }

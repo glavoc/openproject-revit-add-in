@@ -6,6 +6,7 @@ using System.Windows;
 using CefSharp;
 using CefSharp.Wpf;
 using OpenProject.Browser.Services;
+using OpenProject.Browser.Settings;
 
 namespace OpenProject.Browser.WebViewIntegration
 {
@@ -39,7 +40,7 @@ namespace OpenProject.Browser.WebViewIntegration
     {
       Browser = _chromiumWebBrowser;
 
-      var knownGoodUrls = ConfigurationHandler.LoadAllInstances();
+      var knownGoodUrls = ConfigurationHandler.Settings.GetOpenProjectInstances();
       var lastVisitedPage = ConfigurationHandler.LastVisitedPage();
       var isWhiteListedUrl = knownGoodUrls.Any(goodUrl =>
         lastVisitedPage.StartsWith(goodUrl, StringComparison.InvariantCultureIgnoreCase));
@@ -78,7 +79,7 @@ namespace OpenProject.Browser.WebViewIntegration
           }
         });
 
-      if (!ConfigurationHandler.ShouldEnableDevelopmentTools()) return;
+      if (!ConfigurationHandler.Settings.EnableDevelopmentTools) return;
 
       var devToolsEnabled = false;
       Browser.IsBrowserInitializedChanged += (s, e) =>
