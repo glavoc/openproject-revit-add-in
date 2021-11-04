@@ -2,11 +2,11 @@
 using Autodesk.Revit.UI;
 using OpenProject.Revit.Data;
 using OpenProject.Revit.Extensions;
-using OpenProject.Shared.ViewModels.Bcf;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using OpenProject.Revit.Services;
+using OpenProject.Shared.BcfApi;
 using OpenProject.Shared.Math3D;
 using OpenProject.Shared.Math3D.Enumeration;
 using Serilog;
@@ -37,7 +37,7 @@ namespace OpenProject.Revit.Entry
     /// <inheritdoc />
     public string GetName() => nameof(OpenViewpointEventHandler);
 
-    private BcfViewpointViewModel _bcfViewpoint;
+    private BcfViewpointWrapper _bcfViewpoint;
 
     private static OpenViewpointEventHandler _instance;
 
@@ -60,8 +60,12 @@ namespace OpenProject.Revit.Entry
     /// Wraps the raising of the external event and thus the execution of the event callback,
     /// that show given bcf viewpoint.
     /// </summary>
+    /// <remarks>
+    /// http://help.autodesk.com/view/RVT/2014/ENU/?guid=GUID-0A0D656E-5C44-49E8-A891-6C29F88E35C0
+    /// http://matteocominetti.com/starting-a-transaction-from-an-external-application-running-outside-of-api-context-is-not-allowed/
+    /// </remarks>
     /// <param name="bcfViewpoint">The bcf viewpoint to be shown in current view.</param>
-    public static void ShowBcfViewpoint(BcfViewpointViewModel bcfViewpoint)
+    public static void ShowBcfViewpoint(BcfViewpointWrapper bcfViewpoint)
     {
       Log.Information("Received 'Opening BCF Viewpoint event'. Attempting to open viewpoint ...");
       Instance._bcfViewpoint = bcfViewpoint;
@@ -135,13 +139,7 @@ namespace OpenProject.Revit.Entry
       view.DisableTemporaryViewMode(TemporaryViewMode.RevealHiddenElements);
       view.IsSectionBoxActive = false;
 
-      var currentlyHiddenElements = new FilteredElementCollector(uiDocument.Document)
-        .WhereElementIsNotElementType()
-        .WhereElementIsViewIndependent()
-        .Where(element => element.IsHidden(view))
-        .Select(element => element.Id)
-        .ToList();
-
+      var currentlyHiddenElements = uiDocument.Document.GetHiddenElementsOfView(view).ToList();
       if (currentlyHiddenElements.Any())
       {
         Log.Information("Unhide {n} currently hidden elements ...", currentlyHiddenElements.Count);
@@ -177,13 +175,7 @@ namespace OpenProject.Revit.Entry
       view.SetOrientation(viewOrientation3D);
 
       Log.Information("Applying element visibility ...");
-      var currentlyVisibleElements = new FilteredElementCollector(uiDocument.Document, view.Id)
-        .WhereElementIsNotElementType()
-        .WhereElementIsViewIndependent()
-        .Where(element => element.CanBeHidden(view))
-        .Select(element => element.Id)
-        .ToList();
-
+      var currentlyVisibleElements = uiDocument.Document.GetVisibleElementsOfView(view);
       var map = uiDocument.Document.GetIfcGuidElementIdMap(currentlyVisibleElements);
       var exceptionElements = GetViewpointVisibilityExceptions(map);
       var selectedElements = GetViewpointSelection(map);

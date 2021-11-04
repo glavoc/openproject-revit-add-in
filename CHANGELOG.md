@@ -3,6 +3,37 @@
 This is the Changelog for the OpenProject Revit Add-in. It follows the guidelines described
 in https://keepachangelog.com/en/1.0.0/. The versions follow [semantic versioning](https://semver.org/).
 
+## Unreleased
+
+### Added
+
+- Amended README with information about reporting bugs and other useful information
+
+### Changed
+
+- Viewpoint snapshot data is given in an improper state to the OpenProject instance frontend. The current hack has to be
+  maintained until the related
+  [work package](https://community.openproject.org/projects/bcfier/work_packages/39135/activity) is resolved and the
+  solution deployed.
+
+### Fixed
+
+- Section boxes with infinity values, which can exist after importing viewpoints with less then 6 clipping planes, no
+  longer create invalid viewpoint data when generating a new viewpoint.
+- If there is a newer version of the AddIn released at GitHub, a notification dialog is displayed again
+- When exporting a viewpoint from a Revit view, elements hidden by category are interpreted as hidden. However, applying
+  this viewpoint does not apply the category visibility, but sets all contained elements to hidden, as BCF viewpoints
+  are not aware of Revit categories.
+
+## [2.3.1] - 2021-10-04
+
+### Fixed
+
+- Fixed an issue that led to an exception when installing the Revit Add-In for the very first time
+- Made the loading of the `OpenProject.Configuration.json` more robust, so that missing or outdated keys no longer lead
+  to errors
+- Improved logging and error dialog communication
+
 ## [2.3.0] - 2021-09-21
 
 ### Added
@@ -35,7 +66,7 @@ in https://keepachangelog.com/en/1.0.0/. The versions follow [semantic versionin
 - Loading times for viewpoints were slightly improved, on machines without enough capability the asynchronous zoom for
   orthogonal viewpoints can take several seconds (see this
   [official issue](https://thebuildingcoder.typepad.com/blog/2020/10/save-and-restore-3d-view-camera-settings.html)).
-- An issue was fixed, causing the cursor in input fields in the embedded browser vanishing occasionally. 
+- An issue was fixed, causing the cursor in input fields in the embedded browser vanishing occasionally.
 
 ## [2.2.5] - 2021-04-16
 

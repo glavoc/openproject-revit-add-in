@@ -1,16 +1,17 @@
 ﻿using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
-using OpenProject.Revit.Data;
-using OpenProject.Shared.ViewModels.Bcf;
 using OpenProject.Shared;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Windows;
+using iabi.BCF.APIObjects.V21;
+using Newtonsoft.Json.Converters;
+using OpenProject.Revit.Extensions;
+using OpenProject.Revit.Services;
+using OpenProject.Shared.BcfApi;
 using ZetaIpc.Runtime.Client;
 using ZetaIpc.Runtime.Server;
 using ZetaIpc.Runtime.Helper;
@@ -46,35 +47,57 @@ namespace OpenProject.Revit.Entry
       server.Start(freePort);
       server.ReceivedRequest += (_, e) =>
       {
-        var eventArgs = JsonConvert.DeserializeObject<WebUIMessageEventArgs>(e.Request);
+        var eventArgs = JsonConvert.DeserializeObject<WebUiMessageEventArgs>(e.Request);
+        if (eventArgs == null) return;
+
         var localMessageType = eventArgs.MessageType;
         var localTrackingId = eventArgs.TrackingId;
         var localMessagePayload = eventArgs.MessagePayload;
-        _callbackStack.Push(() =>
+
+        lock (_callbackStackLock)
         {
-          switch (localMessageType)
+          _callbackStack.Push(() =>
           {
-            case MessageTypes.VIEWPOINT_DATA:
+            switch (localMessageType)
             {
-              var bcfViewpoint = MessageDeserializer.DeserializeBcfViewpoint(
-                new WebUIMessageEventArgs(localMessageType, localTrackingId, localMessagePayload));
-              OpenView(bcfViewpoint);
-              break;
+              case MessageTypes.VIEWPOINT_DATA:
+              {
+                try
+                {
+                  BcfViewpointWrapper bcfViewpoint = MessageDeserializer.DeserializeBcfViewpoint(
+                    new WebUiMessageEventArgs(localMessageType, localTrackingId, localMessagePayload));
+                  OpenViewpointEventHandler.ShowBcfViewpoint(bcfViewpoint);
+                }
+                catch (Exception exception)
+                {
+                  MessageHandler.ShowError(exception, "Error opening a viewpoint.");
+                }
+
+                break;
+              }
+              case MessageTypes.VIEWPOINT_GENERATION_REQUESTED:
+                try
+                {
+                  AddViewpoint(localTrackingId);
+                }
+                catch (Exception exception)
+                {
+                  MessageHandler.ShowError(exception, "Error generating a viewpoint.");
+                }
+
+                break;
             }
-            case MessageTypes.VIEWPOINT_GENERATION_REQUESTED:
-              AddView(localTrackingId);
-              break;
-          }
-        });
+          });
+        }
       };
 
       return freePort;
     }
 
-    public void StartLocalClient(int bcfierWinServerPort)
+    public void StartLocalClient(int ipcWinServerPort)
     {
       var client = new IpcClient();
-      client.Initialize(bcfierWinServerPort);
+      client.Initialize(ipcWinServerPort);
       _sendData = message =>
       {
         try
@@ -92,144 +115,60 @@ namespace OpenProject.Revit.Entry
 
     public void SendShutdownRequestToDesktopApp()
     {
-      var eventArgs = new WebUIMessageEventArgs(MessageTypes.CLOSE_DESKTOP_APPLICATION, "0", string.Empty);
+      var eventArgs = new WebUiMessageEventArgs(MessageTypes.CLOSE_DESKTOP_APPLICATION, "0", string.Empty);
       var jsonEventArgs = JsonConvert.SerializeObject(eventArgs);
       _sendData(jsonEventArgs);
     }
 
-    /// <summary>
-    /// Raises the External Event to accomplish a transaction in a modeless window
-    /// http://help.autodesk.com/view/RVT/2014/ENU/?guid=GUID-0A0D656E-5C44-49E8-A891-6C29F88E35C0
-    /// http://matteocominetti.com/starting-a-transaction-from-an-external-application-running-outside-of-api-context-is-not-allowed/
-    /// </summary>
-    private void OpenView(BcfViewpointViewModel bcfViewpoint)
-    {
-      try
-      {
-        var uiDoc = _uiApp.ActiveUIDocument;
-
-        if (uiDoc.ActiveView.ViewType == ViewType.Schedule)
-        {
-          MessageBox.Show("BCFier can't take snapshots of schedules.",
-            "Warning!", MessageBoxButton.OK, MessageBoxImage.Warning);
-          return;
-        }
-
-        OpenViewpointEventHandler.ShowBcfViewpoint(bcfViewpoint);
-      }
-      catch (Exception ex1)
-      {
-        TaskDialog.Show("Error opening a View!", "exception: " + ex1);
-      }
-    }
-
     public void SendOpenSettingsRequestToDesktopApp()
     {
-      var eventArgs = new WebUIMessageEventArgs(MessageTypes.GO_TO_SETTINGS, "0", string.Empty);
+      var eventArgs = new WebUiMessageEventArgs(MessageTypes.GO_TO_SETTINGS, "0", string.Empty);
       var jsonEventArgs = JsonConvert.SerializeObject(eventArgs);
       _sendData(jsonEventArgs);
     }
 
     public void SendBringBrowserToForegroundRequestToDesktopApp()
     {
-      var eventArgs = new WebUIMessageEventArgs(MessageTypes.SET_BROWSER_TO_FOREGROUND, "0", string.Empty);
+      var eventArgs = new WebUiMessageEventArgs(MessageTypes.SET_BROWSER_TO_FOREGROUND, "0", string.Empty);
       var jsonEventArgs = JsonConvert.SerializeObject(eventArgs);
       _sendData(jsonEventArgs);
     }
 
     /// <summary>
-    /// Same as in the windows app, but here we generate a VisInfo that is attached to the view
+    /// Generates a viewpoint from the active view and sends the data as an event to bridge.
     /// </summary>
     /// <param name="trackingId">The local message tracking id.</param>
-    private void AddView(string trackingId)
+    private void AddViewpoint(string trackingId)
     {
-      try
+      if (_uiApp.ActiveUIDocument.ActiveView.ViewType != ViewType.ThreeD)
       {
-        if (_uiApp.ActiveUIDocument.ActiveView.ViewType != ViewType.ThreeD)
-        {
-          TaskDialog.Show("Invalid active UI document",
-            "To capture viewpoints the active document must be a 3D view.");
-          return;
-        }
-
-        var generatedViewpoint = RevitView.GenerateViewpoint(_uiApp.ActiveUIDocument);
-        var snapshot = GetRevitSnapshot(_uiApp.ActiveUIDocument.Document);
-        var messageContent = new ViewpointGeneratedApiMessage
-        {
-          SnapshotPngBase64 = "data:image/png;base64," + ConvertToBase64(snapshot),
-          Viewpoint = MessageSerializer.SerializeBcfViewpoint(generatedViewpoint)
-        };
-
-        var serializerSettings = new JsonSerializerSettings
-        {
-          ContractResolver = new CamelCasePropertyNamesContractResolver()
-        };
-
-        var jsonPayload =
-          JObject.Parse(JsonConvert.SerializeObject(messageContent.Viewpoint.Viewpoint, serializerSettings));
-        if (messageContent.Viewpoint.Components != null)
-        {
-          jsonPayload["components"] =
-            JObject.Parse(JsonConvert.SerializeObject(messageContent.Viewpoint.Components, serializerSettings));
-        }
-
-        jsonPayload["snapshot"] = messageContent.SnapshotPngBase64;
-        var payloadString = jsonPayload.ToString();
-
-        var eventArgs = new WebUIMessageEventArgs(MessageTypes.VIEWPOINT_GENERATED, trackingId, payloadString);
-        var jsonEventArgs = JsonConvert.SerializeObject(eventArgs);
-        _sendData(jsonEventArgs);
+        MessageHandler.ShowWarning(
+          "Invalid view",
+          "Active UI document is not a 3D view",
+          "In order to capture BCF viewpoints, the OpenProject Revit Add-In requires a 3D view.");
+        return;
       }
-      catch (Exception exception)
-      {
-        TaskDialog.Show("Error adding a View!", "exception: " + exception);
-      }
+
+      JObject payload = GenerateJsonViewpoint();
+
+      // TODO: remove hack of snapshot data once #39135 is deployed
+      payload["snapshot"] = payload["snapshot"]?["snapshot_data"];
+
+      var eventArgs = new WebUiMessageEventArgs(MessageTypes.VIEWPOINT_GENERATED, trackingId, payload.ToString());
+      _sendData(JsonConvert.SerializeObject(eventArgs));
     }
 
-    private static Stream GetRevitSnapshot(Document doc)
+    private JObject GenerateJsonViewpoint()
     {
-      try
+      var serializerSettings = new JsonSerializerSettings
       {
-        var tempPath = Path.Combine(Path.GetTempPath(), "BCFier");
-        Directory.CreateDirectory(tempPath);
-        var tempImg = Path.Combine(tempPath, Path.GetTempFileName() + ".png");
-        var options = new ImageExportOptions
-        {
-          FilePath = tempImg,
-          HLRandWFViewsFileType = ImageFileType.PNG,
-          ShadowViewsFileType = ImageFileType.PNG,
-          ExportRange = ExportRange.VisibleRegionOfCurrentView,
-          ZoomType = ZoomFitType.FitToPage,
-          ImageResolution = ImageResolution.DPI_72,
-          PixelSize = 1000
-        };
-        doc.ExportImage(options);
+        ContractResolver = new CamelCasePropertyNamesContractResolver(),
+      };
 
-        var memStream = new MemoryStream();
-        using (var fs = File.OpenRead(tempImg))
-        {
-          fs.CopyTo(memStream);
-        }
+      serializerSettings.Converters.Add(new StringEnumConverter(new SnakeCaseNamingStrategy(), false));
 
-        File.Delete(tempImg);
-
-        memStream.Position = 0;
-        return memStream;
-      }
-      catch (Exception exception)
-      {
-        TaskDialog.Show("Error!", "exception: " + exception);
-        throw;
-      }
-    }
-
-    private static string ConvertToBase64(Stream stream)
-    {
-      using var memoryStream = new MemoryStream();
-      stream.CopyTo(memoryStream);
-      var bytes = memoryStream.ToArray();
-
-      return Convert.ToBase64String(bytes);
+      Viewpoint_POST viewpoint = _uiApp.ActiveUIDocument.GenerateViewpoint();
+      return JObject.Parse(JsonConvert.SerializeObject(viewpoint, serializerSettings));
     }
   }
 }

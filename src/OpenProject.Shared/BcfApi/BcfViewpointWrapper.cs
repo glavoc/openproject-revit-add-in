@@ -1,21 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using Dangl;
+﻿using System.Collections.Generic;
 using iabi.BCF.APIObjects.V21;
-using OpenProject.Shared.BcfApi;
 using OpenProject.Shared.Math3D;
 using Optional;
 
-namespace OpenProject.Shared.ViewModels.Bcf
+namespace OpenProject.Shared.BcfApi
 {
   /// <summary>
   /// A view model for BCF viewpoints.
   /// </summary>
-  public sealed class BcfViewpointViewModel : BindableBase
+  public sealed class BcfViewpointWrapper
   {
     public Viewpoint_GET Viewpoint { get; set; }
-
-    public string SnapshotData { get; set; }
 
     public Components Components { get; set; }
 
@@ -33,7 +28,7 @@ namespace OpenProject.Shared.ViewModels.Bcf
         var c = new PerspectiveCamera();
         Perspective_camera bcfPerspective = Viewpoint.Perspective_camera;
 
-        c.FieldOfView = Convert.ToDecimal(bcfPerspective.Field_of_view);
+        c.FieldOfView = bcfPerspective.Field_of_view.ToDecimal();
         c.Position = new Position(
           bcfPerspective.Camera_view_point.ToVector3(),
           bcfPerspective.Camera_direction.ToVector3(),
@@ -47,7 +42,7 @@ namespace OpenProject.Shared.ViewModels.Bcf
         var c = new OrthogonalCamera();
         Orthogonal_camera bcfOrthogonal = Viewpoint.Orthogonal_camera;
 
-        c.ViewToWorldScale = Convert.ToDecimal(bcfOrthogonal.View_to_world_scale);
+        c.ViewToWorldScale = bcfOrthogonal.View_to_world_scale.ToDecimal();
         c.Position = new Position(
           bcfOrthogonal.Camera_view_point.ToVector3(),
           bcfOrthogonal.Camera_direction.ToVector3(),
@@ -62,7 +57,8 @@ namespace OpenProject.Shared.ViewModels.Bcf
     /// <summary>
     /// Gets the list of visibility exceptions or an empty list if any path element is null.
     /// </summary>
-    public List<Component> GetVisibilityExceptions() => Components?.Visibility?.Exceptions ?? new List<Component>();
+    public IEnumerable<Component> GetVisibilityExceptions() =>
+      Components?.Visibility?.Exceptions ?? new List<Component>();
 
     /// <summary>
     /// Gets the visibility default, or false, if any path element is null.
@@ -72,11 +68,11 @@ namespace OpenProject.Shared.ViewModels.Bcf
     /// <summary>
     /// Gets the list of selected components or an empty list if any path element is null.
     /// </summary>
-    public List<Component> GetSelection() => Components?.Selection ?? new List<Component>();
+    public IEnumerable<Component> GetSelection() => Components?.Selection ?? new List<Component>();
 
     /// <summary>
     /// Gets the list of viewpoint clipping planes or an empty list if any path element is null.
     /// </summary>
-    public List<Clipping_plane> GetClippingPlanes() => Viewpoint?.Clipping_planes ?? new List<Clipping_plane>();
+    public IEnumerable<Clipping_plane> GetClippingPlanes() => Viewpoint?.Clipping_planes ?? new List<Clipping_plane>();
   }
 }

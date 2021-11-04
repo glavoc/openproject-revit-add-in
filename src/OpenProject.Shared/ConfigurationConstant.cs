@@ -18,5 +18,8 @@ namespace OpenProject.Shared
 
     public static readonly string OpenProjectBrowserExecutablePath =
       Path.Combine(_openProjectBrowserFolderName, _openProjectBrowserExecutableName);
+
+    public static readonly string OpenProjectTempDirectory =
+      Path.Combine(Path.GetTempPath(), _openProjectRevitAddInFolderName);
   }
 }

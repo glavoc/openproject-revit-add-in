@@ -1,4 +1,5 @@
 {
   "EnableDevelopmentTools": false,
-  "OpenProjectInstances": []
+  "OpenProjectInstances": [],
+  "CheckForUpdates": true
 }

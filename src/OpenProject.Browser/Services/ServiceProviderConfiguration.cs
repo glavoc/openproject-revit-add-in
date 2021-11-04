@@ -32,6 +32,7 @@ namespace OpenProject.Browser.Services
       services.AddSingleton<ChromiumWebBrowser>();
 
       // Interface implementations
+      services.AddSingleton<IGitHubService, GitHubService>();
       services.AddSingleton<IDownloadHandler, OpenProjectBrowserDownloadHandler>();
       services.AddSingleton<IRequestHandler, OpenProjectBrowserRequestHandler>();
       services.AddSingleton<ILifeSpanHandler, OpenProjectBrowserLifeSpanHandler>();
