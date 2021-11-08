@@ -3,6 +3,14 @@
 This is the Changelog for the OpenProject Revit Add-in. It follows the guidelines described
 in https://keepachangelog.com/en/1.0.0/. The versions follow [semantic versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Fixed
+
+- Pre-release versions now are correctly identified as older, when compared to the related release. I.e. when the
+  version `v2.3.1-beta17` is installed and the version `v2.3.1` is available, the update notification dialog is
+  displayed.
+
 ## [2.3.3] - 2021-11-04
 
 ### Added

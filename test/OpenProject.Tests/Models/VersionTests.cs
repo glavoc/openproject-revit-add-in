@@ -35,7 +35,7 @@ namespace OpenProject.Tests.Models
       yield return new object[] { Version.Parse("1.0.0"), Version.Parse("1.1.0"), -1 };
       yield return new object[] { Version.Parse("1.0.0"), Version.Parse("1.0.0"), 0 };
       yield return new object[] { Version.Parse("1.1.13"), Version.Parse("1.1.3"), 1 };
-      yield return new object[] { Version.Parse("1.1.13"), Version.Parse("1.1.13-beta3"), -1 };
+      yield return new object[] { Version.Parse("1.1.13"), Version.Parse("1.1.13-beta3"), 1 };
       yield return new object[] { Version.Parse("1.1.3-abc"), Version.Parse("1.1.3-cba"), -1 };
       yield return new object[] { Version.Parse("1.1.3-b3ee44"), Version.Parse("1.1.3-02aa3e"), 1 };
       yield return new object[] { Version.Parse("1.1.3-0006"), Version.Parse("1.1.3-0007"), -1 };

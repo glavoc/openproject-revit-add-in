@@ -81,6 +81,12 @@ namespace OpenProject.Browser.Models
       if (_patch < other._patch)
         return -1;
 
+      if (string.IsNullOrWhiteSpace(_suffix) && !string.IsNullOrWhiteSpace(other._suffix))
+        return 1;
+
+      if (!string.IsNullOrWhiteSpace(_suffix) && string.IsNullOrWhiteSpace(other._suffix))
+        return -1;
+
       var stringComparison = string.CompareOrdinal(_suffix, other._suffix);
       return stringComparison > 0 ? 1 : stringComparison < 0 ? -1 : 0;
     }
