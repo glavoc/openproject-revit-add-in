@@ -10,6 +10,9 @@ in https://keepachangelog.com/en/1.0.0/. The versions follow [semantic versionin
 - Pre-release versions now are correctly identified as older, when compared to the related release. I.e. when the
   version `v2.3.1-beta17` is installed and the version `v2.3.1` is available, the update notification dialog is
   displayed.
+- Viewpoints with fewer than 6 clipping planes create section boxes with infinite values when applied to Revit. Creating
+  a viewpoint out of this state no longer produces an error, instead the clipping box center is derived of all available
+  finite values
 
 ## [2.3.3] - 2021-11-04
 

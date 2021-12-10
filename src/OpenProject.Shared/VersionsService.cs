@@ -5,11 +5,11 @@ namespace OpenProject.Shared
     [System.CodeDom.Compiler.GeneratedCode("GitVersionBuild", "")]
     public static class VersionsService
     {
-        public static string Version => "2.3.3-beta0018";
-        public static string CommitInfo => "Branch.dev.Sha.d52a81904aad56d88abd4b2ad4d5969d350c52ae";
-        public static string CommitDate => "2021-11-03";
-        public static string CommitHash => "d52a81904aad56d88abd4b2ad4d5969d350c52ae";
-        public static string InformationalVersion => "2.3.3-beta.18+Branch.dev.Sha.d52a81904aad56d88abd4b2ad4d5969d350c52ae";
-        public static DateTime BuildDateUtc { get; } = new DateTime(2021, 11, 3, 14, 47, 10, DateTimeKind.Utc);
+        public static string Version => "2.3.4-beta0005";
+        public static string CommitInfo => "Branch.dev.Sha.e80e32e440760d08aa6e2582fef8c9d4a55a2f32";
+        public static string CommitDate => "2021-11-09";
+        public static string CommitHash => "e80e32e440760d08aa6e2582fef8c9d4a55a2f32";
+        public static string InformationalVersion => "2.3.4-beta.5+Branch.dev.Sha.e80e32e440760d08aa6e2582fef8c9d4a55a2f32";
+        public static DateTime BuildDateUtc { get; } = new DateTime(2021, 12, 9, 12, 50, 24, DateTimeKind.Utc);
     }
 }

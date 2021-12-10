@@ -35,6 +35,20 @@ namespace OpenProject.Tests.Shared.Math3D
 
       yield return new object[]
       {
+        new AxisAlignedBoundingBox(new Vector3(2, decimal.MinValue, decimal.MinValue), Vector3.InfiniteMax),
+        null,
+        new List<Clipping_plane>
+        {
+          new Clipping_plane
+          {
+            Direction = new Direction { X = -1, Y = 0, Z = 0 },
+            Location = new Location { X = 2, Y = 0, Z = 0 }
+          }
+        }
+      };
+
+      yield return new object[]
+      {
         new AxisAlignedBoundingBox(Vector3.Zero, new Vector3(1, 1, 1)),
         null,
         new List<Clipping_plane>
