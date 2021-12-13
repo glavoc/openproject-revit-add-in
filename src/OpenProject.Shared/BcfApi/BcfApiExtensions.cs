@@ -32,7 +32,7 @@ namespace OpenProject.Shared.BcfApi
       this AxisAlignedBoundingBox clippingBox,
       Vector3 clippingCenter = null)
     {
-      Vector3 center = clippingCenter ?? (clippingBox.Min + clippingBox.Max) * 0.5m;
+      Vector3 center = clippingCenter ?? DeriveClippingCenter(clippingBox.Min, clippingBox.Max);
 
       var planes = new List<Clipping_plane>();
 
@@ -121,6 +121,24 @@ namespace OpenProject.Shared.BcfApi
       }
 
       return planes;
+    }
+
+    private static Vector3 DeriveClippingCenter(Vector3 min, Vector3 max) =>
+      new Vector3(
+        GetMeanUnlessInfinite(min.X, max.X),
+        GetMeanUnlessInfinite(min.Y, max.Y),
+        GetMeanUnlessInfinite(min.Z, max.Z)
+      );
+
+    private static decimal GetMeanUnlessInfinite(decimal a, decimal b)
+    {
+      if (a.IsFinite() && b.IsFinite())
+        return (a + b) * 0.5m;
+
+      if (a.IsFinite())
+        return a;
+
+      return b.IsFinite() ? b : 0;
     }
   }
 }
