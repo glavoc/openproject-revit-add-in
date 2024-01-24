@@ -1,5 +1,6 @@
 ﻿using System;
 using Autodesk.Revit.DB;
+using iabi.BCF.APIObjects.V21;
 using OpenProject.Shared.Math3D;
 using decMath = DecimalMath.DecimalEx;
 
@@ -67,6 +68,129 @@ namespace OpenProject.Revit.Data
         position.Up.ToRevitXyz(),
         position.Forward.ToRevitXyz());
 
+    
+    public static Clipping_plane TransformClippingPlanePosition(this Clipping_plane clippingPlane,
+      ProjectPositionWrapper projectBase,
+      //Clipping_plane clippingPlane,
+      bool reverse = false)
+    {
+      var i = reverse ? -1 : 1;
+
+      Vector3 translation = (projectBase.GetTranslation() * i).ToMeters();
+      var rotation = i * projectBase.Angle;
+
+      iabi.BCF.APIObjects.V21.Location location = new iabi.BCF.APIObjects.V21.Location();
+
+      // do translation before rotation if we transform from global to local coordinates
+      if (reverse)
+      {
+        location.X = ((float)(clippingPlane.Location.X.ToDecimal() + translation.X));
+        location.Y = ((float)(clippingPlane.Location.Y.ToDecimal() + translation.Y));
+        location.Z = ((float)(clippingPlane.Location.Z.ToDecimal() + translation.Z));
+      }
+      else
+      {
+        location.X = clippingPlane.Location.X;
+        location.Y = clippingPlane.Location.Y;
+        location.Z = clippingPlane.Location.Z;
+      }
+      
+      // rotation
+      var locationX = location.X.ToDecimal() * decMath.Cos(rotation) - location.Y.ToDecimal() * decMath.Sin(rotation);
+      var locationY = location.X.ToDecimal() * decMath.Sin(rotation) + location.Y.ToDecimal() * decMath.Cos(rotation);
+
+      // do translation after rotation if we transform from local to global coordinates
+      iabi.BCF.APIObjects.V21.Location newLocation = new iabi.BCF.APIObjects.V21.Location();
+      if (reverse)
+      {
+        newLocation.X = (float)locationX;
+        newLocation.Y = (float)locationY;
+        newLocation.Z = location.Z; 
+      }
+      else
+      {
+        newLocation.X = (float)(locationX + translation.X);
+        newLocation.Y = (float)(locationY + translation.Y);
+        newLocation.Z = location.Z + (float)translation.Z;
+      }
+
+      var forwardX = (decimal)clippingPlane.Direction.X * decMath.Cos(rotation) -
+                     (decimal)clippingPlane.Direction.Y * decMath.Sin(rotation);
+      var forwardY = (decimal)clippingPlane.Direction.X * decMath.Sin(rotation) +
+                     (decimal)clippingPlane.Direction.Y * decMath.Cos(rotation);
+
+      iabi.BCF.APIObjects.V21.Direction newDirection = new iabi.BCF.APIObjects.V21.Direction();
+      newDirection.X = (float)forwardX;
+      newDirection.Y = (float)forwardY;
+      newDirection.Z = clippingPlane.Direction.Z;
+      Clipping_plane newClippingPlane = new Clipping_plane();
+      newClippingPlane.Location = newLocation;
+      newClippingPlane.Direction = newDirection;
+
+      return newClippingPlane;
+    }
+    public static Clipping_plane TransformClippingPlanePositionWithoutDirection(this Clipping_plane clippingPlane,
+      ProjectPositionWrapper projectBase,
+      //Clipping_plane clippingPlane,
+      bool reverse = false)
+    {
+      var i = reverse ? -1 : 1;
+
+      Vector3 translation = (projectBase.GetTranslation() * i).ToMeters();
+      var rotation = i * projectBase.Angle;
+
+      iabi.BCF.APIObjects.V21.Location location = new iabi.BCF.APIObjects.V21.Location();
+
+      // do translation before rotation if we transform from global to local coordinates
+      if (reverse)
+      {
+        location.X = ((float)(clippingPlane.Location.X.ToDecimal() + translation.X));
+        location.Y = ((float)(clippingPlane.Location.Y.ToDecimal() + translation.Y));
+        location.Z = ((float)(clippingPlane.Location.Z.ToDecimal() + translation.Z));
+      }
+      else
+      {
+        location.X = clippingPlane.Location.X;
+        location.Y = clippingPlane.Location.Y;
+        location.Z = clippingPlane.Location.Z;
+      }
+
+      // rotation
+      var locationX = location.X.ToDecimal() * decMath.Cos(rotation) - location.Y.ToDecimal() * decMath.Sin(rotation);
+      var locationY = location.X.ToDecimal() * decMath.Sin(rotation) + location.Y.ToDecimal() * decMath.Cos(rotation);
+
+      // do translation after rotation if we transform from local to global coordinates
+      iabi.BCF.APIObjects.V21.Location newLocation = new iabi.BCF.APIObjects.V21.Location();
+      if (reverse)
+      {
+        newLocation.X = (float)locationX;
+        newLocation.Y = (float)locationY;
+        newLocation.Z = location.Z;
+      }
+      else
+      {
+        newLocation.X = (float)(locationX + translation.X);
+        newLocation.Y = (float)(locationY + translation.Y);
+        newLocation.Z = location.Z + (float)translation.Z;
+      }
+
+      var forwardX = (decimal)clippingPlane.Direction.X * decMath.Cos(rotation) -
+                     (decimal)clippingPlane.Direction.Y * decMath.Sin(rotation);
+      var forwardY = (decimal)clippingPlane.Direction.X * decMath.Sin(rotation) +
+                     (decimal)clippingPlane.Direction.Y * decMath.Cos(rotation);
+
+      iabi.BCF.APIObjects.V21.Direction newDirection = new iabi.BCF.APIObjects.V21.Direction();
+      newDirection.X = clippingPlane.Direction.X;
+      newDirection.Y = clippingPlane.Direction.Y;
+      newDirection.Z = clippingPlane.Direction.Z;
+      Clipping_plane newClippingPlane = new Clipping_plane();
+      newClippingPlane.Location = newLocation;
+      newClippingPlane.Direction = newDirection;
+
+      return newClippingPlane;
+    }
+
+
     /// <summary>
     /// Converts a <see cref="Vector3"/> object into a <see cref="Autodesk.Revit.DB.XYZ"/>
     /// </summary>
@@ -112,11 +236,12 @@ namespace OpenProject.Revit.Data
     /// <returns></returns>
     public static double ToMeters(this double internalUnits)
     {
-#if Version2021 || Version2022
+#if Version2021 || Version2022 || Version2024
       return UnitUtils.ConvertFromInternalUnits(internalUnits, UnitTypeId.Meters);
-#else
+#elif Version2020 || Version2019 
       return UnitUtils.ConvertFromInternalUnits(internalUnits, DisplayUnitType.DUT_METERS);
 #endif
+      return 0.001;
     }
 
     /// <summary>
@@ -126,10 +251,11 @@ namespace OpenProject.Revit.Data
     /// <returns></returns>
     public static double ToInternalRevitUnit(this double meters)
     {
-#if Version2021 || Version2022
-      return UnitUtils.ConvertToInternalUnits(meters, UnitTypeId.Meters);
+#if Version2020 || Version2019
+        return UnitUtils.ConvertToInternalUnits(meters, DisplayUnitType.DUT_METERS);
 #else
-      return UnitUtils.ConvertToInternalUnits(meters, DisplayUnitType.DUT_METERS);
+      var unitType = UnitTypeId.Meters;
+      return UnitUtils.ConvertToInternalUnits(meters, UnitTypeId.Meters);
 #endif
     }
 
