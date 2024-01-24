@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ApplicationPackage SchemaVersion="1.0" Name="OpenProject.Navisworks" AppVersion="1.0.0.0" ProductType="Application" Author="ADSK" ProductCode="{0F2CB7C0-2F97-424C-B8DA-0E8233972C7D}">
+  <Components Description="Navisworks 2024 parts">
+    <RuntimeRequirements OS="Win64" Platform="NAVMAN|NAVSIM" SeriesMin="Nw21" SeriesMax="Nw21" />
+    <ComponentEntry AppName="OpenProject.Navisworks" AppType="ManagedPlugin" ModuleName="./Contents/2024/OpenProject.Navisworks.dll" />
+  </Components>
+  <Components Description="Navisworks 2020 parts">
+    <RuntimeRequirements OS="Win64" Platform="NAVMAN|NAVSIM" SeriesMin="Nw17" SeriesMax="Nw17" />
+    <ComponentEntry AppName="OpenProject.Navisworks" AppType="ManagedPlugin" ModuleName="./Contents/2020/OpenProject.Navisworks.dll" />
+  </Components>
+  <Components Description="Navisworks 2021 parts">
+    <RuntimeRequirements OS="Win64" Platform="NAVMAN|NAVSIM" SeriesMin="Nw18" SeriesMax="Nw18" />
+    <ComponentEntry AppName="OpenProject.Navisworks" AppType="ManagedPlugin" ModuleName="./Contents/2021/OpenProject.Navisworks.dll" />
+  </Components>
+  <Components Description="Navisworks 2022 parts">
+    <RuntimeRequirements OS="Win64" Platform="NAVMAN|NAVSIM" SeriesMin="Nw19" SeriesMax="Nw19" />
+    <ComponentEntry AppName="OpenProject.Navisworks" AppType="ManagedPlugin" ModuleName="./Contents/2022/OpenProject.Navisworks.dll" />
+  </Components>
+  <Components Description="Navisworks 2023 parts">
+    <RuntimeRequirements OS="Win64" Platform="NAVMAN|NAVSIM" SeriesMin="Nw20" SeriesMax="Nw20" />
+    <ComponentEntry AppName="OpenProject.Navisworks" AppType="ManagedPlugin" ModuleName="./Contents/2023/OpenProject.Navisworks.dll" />
+  </Components>
+</ApplicationPackage>
