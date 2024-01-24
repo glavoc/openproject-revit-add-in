@@ -48,8 +48,13 @@ namespace OpenProject.Revit.Extensions
       XYZ transformedMax = sectionBox.Transform.OfPoint(sectionBox.Max);
       Vector3 minCorner = transformedMin.ToVector3().ToMeters();
       Vector3 maxCorner = transformedMax.ToVector3().ToMeters();
-
-      return new AxisAlignedBoundingBox(minCorner, maxCorner).ToClippingPlanes();
+      ProjectPosition projectPosition = uiDocument.Document.ActiveProjectLocation.GetProjectPosition(XYZ.Zero);
+      var projectPositionWraapper = new ProjectPositionWrapper(projectPosition);
+      var clippingPlanesInternal = new AxisAlignedBoundingBox(minCorner, maxCorner).ToClippingPlanes().ToList();
+      if(view3D.IsSectionBoxActive)
+        return clippingPlanesInternal.Select(t=>t.TransformClippingPlanePosition(projectPositionWraapper)).ToList();
+      else
+        return null;
     }
 
     private static Snapshot_POST GetBcfSnapshotData(this UIDocument uiDocument)
