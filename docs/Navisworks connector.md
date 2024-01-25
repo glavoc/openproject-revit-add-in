@@ -10,4 +10,4 @@
 - [x] Navisworks
 - [ ] Tekla Structures
 
-![roadmap](images/roadmap.png)
+![roadmap](images/roadmap2.png)
