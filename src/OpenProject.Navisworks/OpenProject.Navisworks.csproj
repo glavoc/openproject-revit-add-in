@@ -129,6 +129,9 @@
 	  
     <PackageReference Include="ZetaIpc" Version="1.0.4.12" />
     <ProjectReference Include="..\OpenProject.Shared\OpenProject.Shared.csproj" />
+    <Reference Include="Autodesk.Navisworks.Api">
+      <HintPath>..\..\..\..\..\..\Program Files\Autodesk\Navisworks Manage 2022\Autodesk.Navisworks.Api.dll</HintPath>
+    </Reference>
 	<Reference Include="netstandard" />
 
 	<PackageReference Include="System.Resources.Extensions" Version="4.6.0" />

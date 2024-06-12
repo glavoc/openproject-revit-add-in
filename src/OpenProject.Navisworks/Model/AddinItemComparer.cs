@@ -1,4 +1,7 @@
-﻿namespace OpenProjectNavisworks.Model;
+﻿using System;
+using System.Collections.Generic;
+
+namespace OpenProjectNavisworks.Model;
 
 /// <summary>
 /// Compare Sort By Full Class Name Method
