@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<RibbonControl
+    xmlns="clr-namespace:Autodesk.Windows;assembly=AdWindows"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="clr-namespace:Autodesk.Navisworks.Gui.Roamer.AIRLook;assembly=navisworks.gui.roamer"
+		xmlns:adwi="clr-namespace:Autodesk.Internal.Windows;assembly:AdWindows"
+    x:Uid="CustomTabSample">
+  <RibbonTab Title="BBTab Add-Ins" Id="BBTab">
+    <RibbonPanel x:Uid="RibbonPanel_1">
+      <RibbonPanelSource x:Uid="RibbonPanelSource_RibbonPanel_1" Title="BB">
+        <local:NWRibbonButton
+                    x:Uid="Button_1"
+                    Id="Button_One"
+                    KeyTip="X1"
+                    Orientation="Vertical"
+                    ShowText="True"
+                    Size="Large" />
+        <local:NWRibbonButton
+                    x:Uid="Button_2"
+                    Id="Button_Two"
+                    KeyTip="X2"
+                    Orientation="Vertical"
+                    ShowText="True"
+                    Size="Large" />
+        <local:NWRibbonButton
+                    x:Uid="Button_3"
+                    Id="Button_Three"
+                    KeyTip="X3"
+                    Orientation="Vertical"
+                    ShowText="True"
+                    Size="Large" />
+      </RibbonPanelSource>
+    </RibbonPanel>
+  </RibbonTab>
+</RibbonControl>
