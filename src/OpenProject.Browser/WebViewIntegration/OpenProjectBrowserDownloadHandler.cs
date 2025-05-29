@@ -10,17 +10,26 @@ namespace OpenProject.Browser.WebViewIntegration
 
     public event EventHandler<DownloadItem> OnDownloadUpdatedFired;
 
-    public void OnBeforeDownload(IWebBrowser chromiumWebBrowser, IBrowser browser, DownloadItem downloadItem,
+    public bool CanDownload(IWebBrowser chromiumWebBrowser, IBrowser browser, string url, string requestMethod)
+    {
+      // Implementing the required method from IDownloadHandler
+      Log.Information("CanDownload called for URL '{url}' with method '{requestMethod}'", url, requestMethod);
+      return true; // Allow all downloads by default
+    }
+
+    public bool OnBeforeDownload(IWebBrowser chromiumWebBrowser, IBrowser browser, DownloadItem downloadItem,
       IBeforeDownloadCallback callback)
     {
       Log.Information("Download triggered for item '{name}'", downloadItem.SuggestedFileName);
 
       OnBeforeDownloadFired?.Invoke(this, downloadItem);
 
-      if (callback.IsDisposed) return;
+      if (callback.IsDisposed) return false;
 
       using (callback)
         callback.Continue(downloadItem.SuggestedFileName, true);
+
+      return true; // Indicate successful handling
     }
 
     public void OnDownloadUpdated(IWebBrowser chromiumWebBrowser, IBrowser browser, DownloadItem downloadItem,
