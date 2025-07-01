@@ -6,6 +6,7 @@ using Autodesk.Navisworks.Api.Plugins;
 using OpenProjectNavisworks.Model;
 using OpenProjectNavisworks.Entry;
 using MessageBox = System.Windows.MessageBox;
+using System;
 
 namespace OpenProjectNavisworks.Command;
 

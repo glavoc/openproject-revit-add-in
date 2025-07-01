@@ -15,6 +15,9 @@ using OpenProjectNavisworks.Data;
 using System.Windows.Media.Media3D;
 using static Autodesk.Navisworks.Gui.Roamer.CommandLineConfig;
 using OpenProject.Shared.Logging;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using System.Linq;
 
 
 namespace OpenProjectNavisworks.Entry;

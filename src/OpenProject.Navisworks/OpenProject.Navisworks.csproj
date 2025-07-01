@@ -187,18 +187,21 @@
 
 
 	<!-- Copy files into Navisworks plugins derictory -->
-	<Target Name="copyfiles" AfterTargets="Build" Condition="$(Configuration.Contains('Debug')) And '$(BuildingInsideVisualStudio)' == 'true'">
-	  <ItemGroup>
-		  <SourceDLLs Include="$(TargetDir)**\*.*" />
-		  <SourceManifest Include="$(ProjectDir)PackageContents.xml" />
-		  <OpenProjectBrowser Include="$(SolutionDir)\src\OpenProject.Browser\bin\Debug\netcoreapp3.1\**\*.*" />
-	  </ItemGroup>
-	  <Copy SourceFiles="@(SourceDLLs)" DestinationFolder="$(ProgramData)\Autodesk\ApplicationPlugins\$(ProjectName).bundle\Contents\$(NavisVersion)\%(RecursiveDir)" />
-	  <Copy SourceFiles="@(SourceManifest)" DestinationFolder="$(ProgramData)\Autodesk\ApplicationPlugins\$(ProjectName).bundle\" />
-	  <Copy SourceFiles="@(OpenProjectBrowser)" DestinationFolder="$(ProgramData)\Autodesk\ApplicationPlugins\$(ProjectName).bundle\Contents\$(NavisVersion)\OpenProject.Browser\%(RecursiveDir)" />
+  <Target Name="copyfiles" AfterTargets="Build" Condition="$(Configuration.Contains('Debug')) And '$(BuildingInsideVisualStudio)' == 'true'">
+    <ItemGroup>
+      <SourceDLLs Include="$(TargetDir)**\*.*" />
+      <SourceManifest Include="$(ProjectDir)PackageContents.xml" />
+      <OpenProjectBrowser Include="$(SolutionDir)src/OpenProject.Browser/bin/Debug/net472/**/*.*" />
+    </ItemGroup>
+
+    <Message Text="Copying browser files: %(OpenProjectBrowser.Identity)" Importance="High" />
+
+    <Copy SourceFiles="@(SourceDLLs)" DestinationFolder="$(ProgramData)\Autodesk\ApplicationPlugins\$(ProjectName).bundle\Contents\$(NavisVersion)\%(RecursiveDir)" />
+    <Copy SourceFiles="@(SourceManifest)" DestinationFolder="$(ProgramData)\Autodesk\ApplicationPlugins\$(ProjectName).bundle\" />
+    <Copy SourceFiles="@(OpenProjectBrowser)" DestinationFolder="$(ProgramData)\Autodesk\ApplicationPlugins\$(ProjectName).bundle\Contents\$(NavisVersion)\OpenProject.Browser\%(RecursiveDir)" />
   </Target>
 
-   <!-- Copy files into Navisworks plugins derictory (Another Solution) -->
+  <!-- Copy files into Navisworks plugins derictory (Another Solution) -->
       <!-- <PropertyGroup> -->
          <!--  <PostBuildEvent>powershell -NoProfile -ExecutionPolicy Unrestricted $(SolutionDir)OpenProjectNavisBCF\postbuild.ps1 -Configuration '$(Configuration)' -SolutionDir '$(SolutionDir)' -ProjectDir '$(ProjectDir)' -Version '$(NavisVersion)'</PostBuildEvent> -->
       <!-- <UserSecretsId>afe62ba7-0a5d-45c6-8256-4fabea3e54f8</UserSecretsId> -->

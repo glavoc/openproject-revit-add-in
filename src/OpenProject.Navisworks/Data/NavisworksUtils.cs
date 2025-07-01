@@ -4,6 +4,7 @@ using Autodesk.Navisworks.Api;
 using OpenProject.Shared.Math3D;
 using decMath = DecimalMath.DecimalEx;
 using OpenProjectNavisworks.Model;
+using System.Collections.Generic;
 
 namespace OpenProjectNavisworks.Data
 {

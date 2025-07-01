@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
 using Autodesk.Navisworks.Api.Plugins;
 using MessageBox = System.Windows.MessageBox;
 

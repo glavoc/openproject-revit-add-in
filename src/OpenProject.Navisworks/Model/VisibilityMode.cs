@@ -1,4 +1,6 @@
-﻿namespace OpenProjectNavisworks.Model;
+﻿using System;
+
+namespace OpenProjectNavisworks.Model;
 
 [Flags]
 public enum VisibilityMode
