@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Autodesk.Revit.DB;
 using iabi.BCF.APIObjects.V21;
@@ -82,7 +83,7 @@ namespace OpenProject.Revit.Extensions
       {
         Originating_system = doc.Application.VersionName,
         Ifc_guid = IfcGuid.ToIfcGuid(ExportUtils.GetExportId(doc, id)),
-        Authoring_tool_id = id.ToString()
+        Authoring_tool_id = Path.GetFileNameWithoutExtension(doc.PathName)
       };
     }
 

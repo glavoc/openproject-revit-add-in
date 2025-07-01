@@ -14,7 +14,14 @@
     },
     "Revit2022": {
       "commandName": "Executable",
-      "executablePath": "C:\\Program Files\\Autodesk\\Revit 2022\\Revit.exe"
+      "executablePath": "C:\\Program Files\\Autodesk\\Revit 2022\\Revit.exe",
+      "nativeDebugging": true
+    },
+    "Revit2024": {
+      "commandName": "Executable",
+      "executablePath": "C:\\Program Files\\Autodesk\\Revit 2024\\Revit.exe",
+      "commandLineArgs": "/language ENG",
+      "nativeDebugging": true
     }
   }
 }

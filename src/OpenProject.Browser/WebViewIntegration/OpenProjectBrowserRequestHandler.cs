@@ -106,8 +106,10 @@ namespace OpenProject.Browser.WebViewIntegration
       return true;
     }
 
-    public void OnRenderProcessTerminated(IWebBrowser chromiumWebBrowser, IBrowser browser, CefTerminationStatus status)
+    public void OnRenderProcessTerminated(IWebBrowser chromiumWebBrowser, IBrowser browser, CefTerminationStatus status, int errorCode, string errorMessage)
     {
+      // Handle the render process termination logic here
+      Debug.WriteLine($"Render process terminated. Status: {status}, ErrorCode: {errorCode}, ErrorMessage: {errorMessage}");
     }
 
     public void OnRenderViewReady(IWebBrowser chromiumWebBrowser, IBrowser browser)

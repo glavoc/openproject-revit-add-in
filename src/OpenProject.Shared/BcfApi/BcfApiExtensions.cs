@@ -122,5 +122,132 @@ namespace OpenProject.Shared.BcfApi
 
       return planes;
     }
+    // for Navis Box
+    public static List<Clipping_plane> ToClippingPlanes(Vector3 minCorner, Vector3 maxCorner, Vector3 rotation)
+    {
+      Vector3 center = (minCorner + maxCorner) * 0.5m;
+      decimal deltaX = maxCorner.X - minCorner.X;
+      decimal deltaY = maxCorner.Y - minCorner.Y;
+      double angle = Decimal.ToDouble(rotation.Z);
+      decimal cosR = Convert.ToDecimal(Math.Cos(Math.PI * angle/180.0));
+      decimal sinR = Convert.ToDecimal(Math.Sin(Math.PI * angle / 180.0));
+
+      var planes = new List<Clipping_plane>();
+
+      //a_1
+      if (minCorner.X.IsFinite())
+      {
+        float rx = Convert.ToSingle(-1 * cosR - 0 * sinR);
+        float ry = Convert.ToSingle(0 * cosR + -1 * sinR);
+        planes.Add(new Clipping_plane
+        {
+          Location = new Location
+          {
+            X = Convert.ToSingle((-deltaX/2)*cosR+center.X),
+            Y = Convert.ToSingle((-deltaX / 2) * sinR + center.Y),
+            Z = Convert.ToSingle(center.Z)
+          },
+          Direction = new Direction { X = rx, Y = ry, Z = 0 }
+        });
+      }
+
+      //b_2
+      if (minCorner.Y.IsFinite())
+      {
+        float rx = Convert.ToSingle(0 * cosR - (-1) * sinR);
+        float ry = Convert.ToSingle(-1 * cosR + 0 * sinR);
+        planes.Add(new Clipping_plane
+        {
+          Location = new Location
+          {
+            X = Convert.ToSingle((deltaY / 2) * sinR + center.X),
+            Y = Convert.ToSingle((-deltaY / 2) * cosR + center.Y),
+            Z = Convert.ToSingle(center.Z)
+          },
+          Direction = new Direction { X = rx, Y = ry, Z = 0 }
+        });
+      }
+
+      //
+      if (minCorner.Z.IsFinite())
+      {
+        planes.Add(new Clipping_plane
+        {
+          Location = new Location
+          {
+            X = Convert.ToSingle(center.X),
+            Y = Convert.ToSingle(center.Y),
+            Z = Convert.ToSingle(minCorner.Z)
+          },
+          Direction = new Direction { X = 0, Y = 0, Z = -1 }
+        });
+      }
+
+      //a_2
+      if (maxCorner.X.IsFinite())
+      {
+        float rx = Convert.ToSingle(1 * cosR - 0 * sinR);
+        float ry = Convert.ToSingle(0 * cosR + 1 * sinR);
+        planes.Add(new Clipping_plane
+        {
+          Location = new Location
+          {
+            X = Convert.ToSingle((deltaX / 2) * cosR + center.X),
+            Y = Convert.ToSingle((deltaX / 2) * sinR + center.Y),
+            Z = Convert.ToSingle(center.Z)
+          },
+          Direction = new Direction { X = rx, Y = ry, Z = 0 }
+        });
+      }
+
+      //b_1
+      if (maxCorner.Y.IsFinite())
+      {
+        float rx = Convert.ToSingle(0 * cosR - 1 * sinR);
+        float ry = Convert.ToSingle(1 * cosR + 0 * sinR);
+        planes.Add(new Clipping_plane
+        {
+          Location = new Location
+          {
+            X = Convert.ToSingle((-deltaY / 2) * sinR + center.X),
+            Y = Convert.ToSingle((deltaY / 2) * cosR + center.Y),
+            Z = Convert.ToSingle(center.Z)
+          },
+          Direction = new Direction { X = rx, Y = ry, Z = 0 }
+        });
+      }
+
+      //
+      if (maxCorner.Z.IsFinite())
+      {
+        planes.Add(new Clipping_plane
+        {
+          Location = new Location
+          {
+            X = Convert.ToSingle(center.X),
+            Y = Convert.ToSingle(center.Y),
+            Z = Convert.ToSingle(maxCorner.Z)
+          },
+          Direction = new Direction { X = 0, Y = 0, Z = 1 }
+        });
+      }
+
+      return planes;
+    }
+    //// for Navis Planes
+    //public static Clipping_plane ToClippingPlanes(Vector3 normal, Decimal distance)
+    //{
+    //  Clipping_plane plane = new Clipping_plane
+    //  {
+    //    Location = new Location
+    //    {
+    //      X = Convert.ToSingle(center.X),
+    //      Y = Convert.ToSingle(center.Y),
+    //      Z = Convert.ToSingle(maxCorner.Z)
+    //    },
+    //    Direction = new Direction { X = 0, Y = 0, Z = 1 }
+    //  };
+    //  return plane;
+    //}
   }
 }

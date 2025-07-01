@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "OpenProject.Browser": {
+      "commandName": "Project",
+      "commandLineArgs": "ipc 55555 55556"
+    }
+  }
+}

@@ -10,6 +10,12 @@ using OpenProject.Shared.BcfApi;
 using OpenProject.Shared.Math3D;
 using OpenProject.Shared.Math3D.Enumeration;
 using Serilog;
+//using System.Numerics;
+//using iabi.BCF.BCFv2.Schemas;
+using MathNet;
+using MathNet.Spatial.Euclidean;
+using iabi.BCF.APIObjects.V21;
+using OpenProject.Shared.Logging;
 
 namespace OpenProject.Revit.Entry
 {
@@ -29,6 +35,7 @@ namespace OpenProject.Revit.Entry
       }
       catch (Exception ex)
       {
+        Logger.ConfigureLogger("OpenProject.Revit.Log..txt");
         Log.Error(ex, "Failed to load BCF viewpoint");
         TaskDialog.Show("Error!", "exception: " + ex);
       }
@@ -210,7 +217,10 @@ namespace OpenProject.Revit.Entry
 
       Log.Information("Retrieving viewpoint clipping planes " +
                       "and converting them into an axis aligned bounding box ...");
-      AxisAlignedBoundingBox boundingBox = GetViewpointClippingBox();
+
+      ProjectPosition projectPosition = uiDocument.Document.ActiveProjectLocation.GetProjectPosition(XYZ.Zero);
+      var projectPositionWrapper = new ProjectPositionWrapper(projectPosition);
+      AxisAlignedBoundingBox boundingBox = GetViewpointClippingBox(projectPositionWrapper);
 
       if (!boundingBox.Equals(AxisAlignedBoundingBox.Infinite))
       {
@@ -219,12 +229,188 @@ namespace OpenProject.Revit.Entry
         view.IsSectionBoxActive = true;
       }
 
-      trans.Commit();
+      var bcf = _bcfViewpoint;
+      var clippingPlanesNotTransformed = _bcfViewpoint.GetClippingPlanes().ToList();
+      if (clippingPlanesNotTransformed.Count() != 0)
+      {
+        var clippingPlanes = _bcfViewpoint.GetClippingPlanes().Select(plane => plane.TransformClippingPlanePosition(projectPositionWrapper, true)).ToList();
+
+        //// MathNET | 1. Get Spatial planes
+        //var clippingPlanesMathSpatial = _bcfViewpoint.GetClippingPlanes()
+        //.Select(plane => ToMathSpatialPlane(plane.TransformClippingPlanePosition(projectPositionWrapper, true))).ToList();
+        //// MathNET | 3. Get all intersection points
+        //List<MathNet.Spatial.Euclidean.Point3D> points = GetAllPlanesIntersectionPoints(clippingPlanesMathSpatial);
+        //// MathNET | 3. Find Min and Max points
+        //Point3D minPoint = FindMinPoint(points);
+        //Point3D maxPoint = FindMaxPoint(points);
+
+        decimal l1 = 0; decimal l2 = 0; decimal l3 = 0;
+        int firstPairPlane1 = 0;
+        int firstPairPlane2 = 0;
+        int secondPairPlane1 = 0;
+        int secondPairPlane2 = 0;
+        int zPairPlane1 = 0;
+        int zPairPlane2 = 0;
+
+        // 1. Finding parallel planes
+        for (int i = 0; i < clippingPlanes.Count; i++)
+        {
+          Vector3 n1 = new Vector3(clippingPlanes[i].Direction.X.ToDecimal(), clippingPlanes[i].Direction.Y.ToDecimal(), clippingPlanes[i].Direction.Z.ToDecimal());
+          for (int j = 0; j < clippingPlanes.Count; j++)
+          {
+            Vector3 n2 = new Vector3(clippingPlanes[j].Direction.X.ToDecimal(), clippingPlanes[j].Direction.Y.ToDecimal(), clippingPlanes[j].Direction.Z.ToDecimal());
+            var dotProduct = (n1.X * n2.X + n1.Y * n2.Y + n1.Z * n2.Z);
+
+            if (Math.Round(dotProduct, 0) == -1)
+            {
+              var l = Math.Sqrt(
+                Math.Pow(clippingPlanes[i].Location.X - clippingPlanes[j].Location.X, 2) +
+                Math.Pow(clippingPlanes[i].Location.Y - clippingPlanes[j].Location.Y, 2) +
+                Math.Pow(clippingPlanes[i].Location.Z - clippingPlanes[j].Location.Z, 2)).ToDecimal();
+
+              if (n1.X == 0 && n1.Y == 0)
+              {
+                l3 = l;
+                zPairPlane1 = i;
+                zPairPlane2 = j;
+                continue;
+              }
+
+              if (l != l1 && l1 == 0)
+              {
+                l1 = l;
+                firstPairPlane1 = i;
+                firstPairPlane2 = j;
+              }
+              else if (l != l2 && l2 == 0)
+              {
+                l2 = l;
+                secondPairPlane1 = i;
+                secondPairPlane2 = j;
+              }
+            }
+          }
+        }
+
+        // 2. Finding center coordinates
+        double cX = (clippingPlanes[firstPairPlane1].Location.X + clippingPlanes[firstPairPlane2].Location.X) / 2;
+        double cY = (clippingPlanes[firstPairPlane1].Location.Y + clippingPlanes[firstPairPlane2].Location.Y) / 2;
+        double cZ = clippingPlanes[firstPairPlane1].Location.Z;
+
+        // 3. Finding sides
+        // Short and Long
+        var shortPlane1 = firstPairPlane1;
+        var shortPlane2 = firstPairPlane2;
+        var longPlane1 = secondPairPlane1;
+        var longPlane2 = secondPairPlane2;
+        var shortLength = l1;
+        var longLength = l2;
+        if (l1 > l2)
+        {
+          shortPlane1 = secondPairPlane1;
+          shortPlane2 = secondPairPlane2;
+          longPlane1 = firstPairPlane1;
+          longPlane2 = firstPairPlane2;
+          shortLength = l2;
+          longLength = l1;
+        }
+        // Upper and Lower
+        var lowerPlane = zPairPlane1;
+        var upperPlane = zPairPlane2;
+        var height = l3;
+        if (clippingPlanes[zPairPlane1].Location.Z > clippingPlanes[zPairPlane2].Location.Z)
+        {
+          lowerPlane = zPairPlane2;
+          upperPlane = zPairPlane1;
+        }
+
+
+        // Rotation angle
+        var rotAngleRadNotTransformedBefore = Math.Acos(clippingPlanesNotTransformed[shortPlane1].Direction.X);
+        //var rotAngleRadX = Math.Acos(-clippingPlanesNotTransformed[firstPairPlane1].Direction.X);
+        //var rotAngleRadY = Math.Asin(-clippingPlanesNotTransformed[firstPairPlane1].Direction.Y);
+        var rotAngleRadNotTransformedBeforeDeg = rotAngleRadNotTransformedBefore * 180 / Math.PI;
+
+        var xSign = Math.Sign(clippingPlanesNotTransformed[shortPlane1].Direction.X);
+        var ySign = Math.Sign(clippingPlanesNotTransformed[shortPlane1].Direction.Y);
+        var rotAngleRadNotTransformedAfter = 0.0;
+
+
+        // o|
+        // ---
+        //  |
+        if (xSign < 0 && ySign > 0)
+        {
+          rotAngleRadNotTransformedAfter = rotAngleRadNotTransformedBefore;
+
+        }
+        //  |o
+        // ---
+        //  |
+        else if (xSign > 0 && ySign > 0)
+        {
+          rotAngleRadNotTransformedAfter = rotAngleRadNotTransformedBefore;
+
+        }
+        //  |
+        // ---
+        //  |o
+        else if (xSign > 0 && ySign < 0)
+        {
+          rotAngleRadNotTransformedAfter = 360 * Math.PI / 180 - rotAngleRadNotTransformedBefore;
+        }
+        //  |
+        // ---
+        // o|
+        else
+        {
+          rotAngleRadNotTransformedAfter = 360 * Math.PI / 180 - rotAngleRadNotTransformedBefore;
+        }
+        var rotAngleRadNotTransformedAfterDeg = rotAngleRadNotTransformedAfter * 180 / Math.PI;
+
+        var projAngle = projectPositionWrapper.Angle;
+        var projAngleDeg = Convert.ToDouble(projAngle) * 180 / Math.PI;
+        var rotAngleTransformed = rotAngleRadNotTransformedAfter - Convert.ToDouble(projAngle);
+        var rotAngleTransformedDeg = rotAngleTransformed * 180 / Math.PI;
+
+
+
+
+        XYZ axis = new XYZ(0, 0, 1);
+        XYZ origin = new XYZ(cX.ToInternalRevitUnit(), cY.ToInternalRevitUnit(), cZ.ToInternalRevitUnit());
+        Transform rotate = Transform.CreateRotationAtPoint(axis, rotAngleTransformed, origin);
+
+
+
+        // Box
+        BoundingBoxXYZ sectionBox = new BoundingBoxXYZ();
+        sectionBox.Min = new XYZ(
+          (cX - Convert.ToDouble(shortLength) / 2).ToInternalRevitUnit(),
+          (cY - Convert.ToDouble(longLength) / 2).ToInternalRevitUnit(),
+          Convert.ToDouble(clippingPlanes[lowerPlane].Location.Z).ToInternalRevitUnit()); ;
+        sectionBox.Max = new XYZ(
+          (cX + Convert.ToDouble(shortLength) / 2).ToInternalRevitUnit(),
+          (cY + Convert.ToDouble(longLength) / 2).ToInternalRevitUnit(),
+          Convert.ToDouble(clippingPlanes[upperPlane].Location.Z).ToInternalRevitUnit());
+
+        sectionBox.Transform = sectionBox.Transform.Multiply(rotate);
+        view.SetSectionBox(sectionBox);
+        view.IsSectionBoxActive = true;
+
+        //// Maks Box
+
+        trans.Commit();
+      }
     }
 
-    private AxisAlignedBoundingBox GetViewpointClippingBox() => _bcfViewpoint.GetClippingPlanes()
+    private AxisAlignedBoundingBox GetViewpointClippingBox(ProjectPositionWrapper projectPositionWrapper)
+    {
+      var clippingPlanes = _bcfViewpoint.GetClippingPlanes()
+      .Select(plane => plane.TransformClippingPlanePosition(projectPositionWrapper, true))
       .Select(p => p.ToAxisAlignedBoundingBox(_viewpointAngleThresholdRad))
       .Aggregate(AxisAlignedBoundingBox.Infinite, (current, nextBox) => current.MergeReduce(nextBox));
+      return clippingPlanes;
+      }
 
     private List<ElementId> GetViewpointVisibilityExceptions(IReadOnlyDictionary<string, ElementId> filterMap)
       => _bcfViewpoint.GetVisibilityExceptions()
@@ -250,6 +436,82 @@ namespace OpenProject.Revit.Entry
         box.Max.Z == decimal.MaxValue ? double.MaxValue : ((double)box.Max.Z).ToInternalRevitUnit());
 
       return new BoundingBoxXYZ { Min = min, Max = max };
+    }
+
+    private static MathNet.Spatial.Euclidean.Plane ToMathSpatialPlane(Clipping_plane plane)
+    {
+      var rootPoint = new MathNet.Spatial.Euclidean.Point3D(plane.Location.X, plane.Location.Y, plane.Location.Z);
+      var normal = MathNet.Spatial.Euclidean.UnitVector3D.Create(plane.Direction.X, plane.Direction.Y, plane.Direction.Z);
+      return new MathNet.Spatial.Euclidean.Plane(rootPoint, normal);
+    }
+
+    private static List<MathNet.Spatial.Euclidean.Point3D> GetAllPlanesIntersectionPoints(List<MathNet.Spatial.Euclidean.Plane> planes)
+    {
+      List<MathNet.Spatial.Euclidean.Point3D> points = new List<MathNet.Spatial.Euclidean.Point3D>();
+
+      foreach (var plane1 in planes)
+      {
+        foreach (var plane2 in planes)
+        {
+          foreach (var plane3 in planes)
+          {
+            try
+            { 
+              points.Add(MathNet.Spatial.Euclidean.Plane.PointFromPlanes(plane1, plane2, plane3));
+            }
+            catch{
+
+            }
+          }
+        }
+      }
+
+      return points;
+    }
+
+    private static MathNet.Spatial.Euclidean.Point3D FindMaxPoint(List<MathNet.Spatial.Euclidean.Point3D> points)
+    {
+      var maxCoordinates = Double.MinValue;
+      Point3D maxPoint = new Point3D();
+      foreach (Point3D point in points)
+      {
+        var sumCoordinates = point.X + point.Y + point.Z;
+        // Skip points that has enormous coordinates
+        if (Math.Abs(sumCoordinates) > Math.Abs(point.X) * 10000 ||
+          Math.Abs(sumCoordinates) > Math.Abs(point.Y) * 10000 ||
+          Math.Abs(sumCoordinates) > Math.Abs(point.Z) * 10000)
+          continue;
+
+        if (sumCoordinates > maxCoordinates)
+        {
+          maxCoordinates = sumCoordinates;
+          maxPoint = point;
+        }
+      }
+      return maxPoint;
+    }
+    private static MathNet.Spatial.Euclidean.Point3D FindMinPoint(List<MathNet.Spatial.Euclidean.Point3D> points)
+    {
+      var minCoordinates = Double.MaxValue;
+      Point3D minPoint = new Point3D();
+      foreach (Point3D point in points)
+      {
+        
+
+        var sumCoordinates = point.X + point.Y + point.Z;
+        // Skip points that has enormous coordinates
+        if (Math.Abs(sumCoordinates) > Math.Abs(point.X) * 10000 ||
+          Math.Abs(sumCoordinates) > Math.Abs(point.Y) * 10000 ||
+          Math.Abs(sumCoordinates) > Math.Abs(point.Z) * 10000)
+          continue;
+
+          if (sumCoordinates < minCoordinates)
+        {
+          minCoordinates = sumCoordinates;
+          minPoint = point;
+        }
+      }
+      return minPoint;
     }
   }
 }
